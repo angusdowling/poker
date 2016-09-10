@@ -1,0 +1,11 @@
+extends layout
+
+block content
+    h3.
+        Tables
+    ul
+        each table, i in tables
+            li#table_list_item
+                div
+                    p Name:   #{table.name}
+                    a(href="/table/#{table.id}/") Open Table

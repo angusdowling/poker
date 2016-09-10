@@ -1,0 +1,94 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Variables
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+ /*
+  Define custom variables here to override helpers/variables.
+ */
+
+ /* - - - - - - - - - - - - - - - - - - - - - - - - -
+  *  Import helpers
+  * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+  @import "framework/helpers/variables";
+  @import "framework/helpers/functions";
+  @import "framework/helpers/animation";
+  @import "framework/helpers/functional";
+  @import "framework/helpers/keyframes";
+  @import "framework/helpers/structural";
+  @import "framework/helpers/visual";
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Browser Update Prompt
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+.browser-upgrade {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	// background: $theme-color-99;
+	z-index: 9999;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
+	filter: alpha(opacity=90);
+	opacity: 0.9;
+
+	.close {
+		position: absolute;
+		right: 1em;
+		top: 1em;
+		cursor: pointer;
+		// color: $theme-color-00;
+
+		&:before {
+			content: "x";
+			display: block;
+			border-radius: 50%;
+			font-family: var($typography, fonts primary);
+			font-size: 2em;
+			line-height: 100%;
+		}
+
+		span {
+			display: none;
+		}
+	}
+
+	.browser-upgrade-content {
+		position: absolute;
+		top: 50%;
+		width: 100%;
+		margin-top: -6em;
+		// color: $theme-color-00;
+		text-align: center;
+
+		.heading {
+			margin-bottom: 0.5em;
+			font-size: 3em;
+			font-family: var($typography, fonts primary);
+			text-transform: uppercase;
+			line-height: 120%;
+		}
+
+		a {
+			display: inline-block;
+			margin: 0;
+			padding: 0.5em 1em;
+			// background-color: $theme-color-00;
+			// border: 2px solid $theme-color-99;
+			// color: $theme-color-99;
+			text-decoration: none;
+		}
+	}
+}
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  IE-Specific Overrides
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+/* Our old mate IE, sometimes needs a little extra help. Here is the metaphorical
+ * counselling room where we give it some extra guidance.
+ *
+ * PLEASE comment each rule you have in here to explain what's going on. */

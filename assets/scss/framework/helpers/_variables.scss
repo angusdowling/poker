@@ -1,0 +1,101 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Variables
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+/* Typography */
+$baseline: 3;
+$typography: (
+  fonts: (
+    primary: unquote("'Roboto', san-serif"),
+    secondary: unquote("'Roboto', serif")
+  ),
+
+  base: (
+    size: 20,
+    leading: 1
+  ),
+  input: 16px,
+  print: 12px,
+  sizes: (
+    ("h1", 3),
+    ("h2", 2.5),
+    ("h3", 2),
+    ("h4", 1.75),
+    ("h5", 1.25),
+    ("h6", 1),
+    ("p", 1)
+  )
+);
+
+/* Colour */
+$colors: (
+  brand: (
+    1: rgba(0, 0, 0, 1),      // Black
+    2: rgba(255, 255, 255, 1) // White
+  ),
+
+  state: (
+    error: #BD3030,
+    success: #38CE31
+  )
+);
+
+/* Responsive Breakpoints */
+$mobile-small:    320px !default;
+$mobile:          480px !default;
+$phablet:         640px !default;
+$tablet:          768px !default;
+$narrow:          1024px !default;
+$desktop:         1280px !default;
+$wide-desktop:    1600px !default;
+
+$min-mobile-small:  $mobile-small + 1;
+$min-mobile:        $mobile + 1;
+$min-phablet:       $phablet + 1;
+$min-tablet:        $tablet + 1;
+$min-narrow:        $narrow + 1;
+$min-desktop:       $desktop + 1;
+$min-wide-desktop:  $wide-desktop + 1;
+
+$breakpoints: (
+  ("all",           0px),
+  ("mobile-small",  $min-mobile-small),
+  ("mobile",        $min-mobile),
+  ("phablet",       $min-phablet),
+  ("tablet",        $min-tablet),
+  ("narrow",        $min-narrow),
+  ("desktop",       $min-desktop),
+  ("wide-desktop",  $min-wide-desktop)
+);
+
+$breakpoint-ranges: (
+  ("mobile-small-to-mobile",  $mobile-small,  $mobile),
+  ("mobile-to-phablet",       $mobile,        $phablet),
+  ("phablet-to-tablet",       $phablet,       $tablet),
+  ("tablet-to-narrow",        $tablet,        $narrow),
+  ("narrow-to-desktop",       $narrow,        $desktop),
+  ("desktop-to-wide-desktop", $desktop,       $wide-desktop)
+);
+
+/* Grid */
+$gutters: 10px;
+$columns: (
+  (1,       8.33333%),
+  (2,       16.66666%),
+  (3,       25%),
+  (4,       33.33333%),
+  (5,       41.66666%),
+  (6,       50%),
+  (7,       58.33333%),
+  (8,       66.66666%),
+  (9,       75%),
+  (10,      83.33333%),
+  (11,      91.66666%),
+  (12,      100%),
+  ("fifth", 20%)
+);
+
+// icon-#{icon-name} | height | width
+$icons: (
+  ("account",  24px,  24px)
+);

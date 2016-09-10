@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  if (!user)
+    a(href="/user/login") Login
+    br
+    a(href="/user/register") Register
+  if (user)
+    p You are currently logged in as #{user.username}
+    a(href="/admin/table/new") New Table
+    a(href="/lobby") Lobby
+    a(href="/user/logout") Logout

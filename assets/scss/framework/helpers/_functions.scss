@@ -1,0 +1,33 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Functions
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+@function var($map, $keys: null) {
+  @if ($keys != null){
+    @each $key in $keys {
+      $map: map-get($map, $key);
+    }
+  }
+  @return $map;
+}
+
+// Vertical Rhythm
+@function leading($size){
+  $sizePx: $size * var($typography, base size);
+  $remainder: $sizePx % $baseline;
+  @if($remainder == 0){
+    @return 1;
+  }
+  @return ($sizePx + -($remainder - $baseline)) / $sizePx;
+};
+
+@function margin($size, $count){
+  $sizePx: $size * var($typography, base size);
+  $lines: leading($size) * $sizePx / $baseline;
+  $multiply: $count * round($lines / 2);
+  @return ($multiply / $lines) + em;
+};
+
+@function row($count){
+  @return $count * $baseline;
+};

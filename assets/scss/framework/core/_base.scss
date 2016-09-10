@@ -1,0 +1,51 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Base
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+body,
+html {
+  font-family: var($typography, fonts primary);
+  font-size: var($typography, base size) - 4 + px;
+  line-height: leading(1);
+
+  @media(min-width: $min-narrow){
+    font-size: var($typography, base size) - 2 + px;
+    line-height: leading(1.125);
+  }
+
+  @media(min-width: $min-desktop){
+    font-size: var($typography, base size) + px;
+    line-height: leading(1.25);
+  }
+}
+
+ul,
+ol {
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+
+  &:link,
+  &:visited {
+    color: var($colors, brand 1);
+  }
+
+  &:hover,
+  &:focus {
+
+  }
+}
+
+// Typography
+@each $label, $size in var($typography, sizes){
+  #{$label},
+  .#{$label} {
+    font-size: $size + em;
+    line-height: leading($size);
+    margin-top: margin($size, 2);
+    margin-bottom: margin($size, 1);
+  }
+}

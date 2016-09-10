@@ -1,0 +1,62 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Icons
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+ // Apply properties to icon
+ @mixin icon-properties($scale: 1, $inline: false) {
+ 	background-repeat: no-repeat;
+ 	background-size: cover;
+ 	background-position: center center;
+ 	cursor: pointer;
+ 	outline: 0;
+ 	transform: scale($scale);
+
+ 	@if($inline){
+ 		svg {
+ 			display: block;
+ 			width: 100%;
+ 			height: 100%;
+ 		}
+ 	}
+
+  @else {
+ 		@include notext;
+ 	}
+
+ }
+
+ // A loop that goes through all the icons. Finds a match with the input criteria.
+ @mixin icon-list($icon: false, $type: svg, $inline: false) {
+ 	@each $label, $height, $width in $icons {
+ 		@if($label == $icon){
+ 			@if($inline == false){
+ 				background-image: url('../images/icons/icon-#{$label}.#{$type}');
+ 			}
+
+ 			height: #{$height};
+ 			width: #{$width};
+
+ 			&:before {
+ 				@if($inline == false){
+ 					content: "#{$label}";
+ 				}
+ 			}
+ 		}
+ 	}
+ }
+
+ // This mixin will grab the relevant icon
+ @mixin icon($icon: false, $scale: 1, $position: false, $type: svg, $inline: false){
+ 	@if $position {
+ 		&:#{$position} {
+ 			content: "";
+ 			@include icon-properties($scale, $inline: $inline);
+ 			@include icon-list($icon: $icon, $type: $type, $inline: $inline);
+ 		}
+ 	}
+
+ 	@else {
+ 		@include icon-properties($scale, $inline: $inline);
+ 		@include icon-list($icon: $icon, $type: $type , $inline: $inline);
+ 	}
+ }

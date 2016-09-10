@@ -1,0 +1,36 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Structural
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+@mixin clearfix {
+	*zoom: 1;
+
+	&:before,
+	&:after {
+	    content: " ";
+	    display: table;
+	}
+
+	&:after {
+	    clear: both;
+	}
+}
+
+@mixin constrained($width: $wide-desktop) {
+	@include clearfix;
+
+	@media(min-width: $min-desktop) {
+		padding: 0;
+	}
+
+	@media(min-width: $min-wide-desktop) {
+		margin: 0 auto;
+		width: $width;
+	}
+}
+
+@mixin horizontal($alignment) {
+	display: inline-block;
+	vertical-align: $alignment;
+	font-size: 1rem;
+}

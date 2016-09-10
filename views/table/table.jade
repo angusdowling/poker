@@ -1,0 +1,41 @@
+extends ../layout
+
+block content
+    h3.
+        Tables
+    ul
+        li#table_list_item
+            p Name:   #{table.name}
+            p Type:   #{table.type}
+            p Buyin:  #{table.buyin}
+            p sBlind: #{table.sblind}
+            p bBlind: #{table.bblind}
+            p Status: #{table.status}
+    
+    div.table
+        ul.actions
+            li
+                a(href="/table/#{table._id}/shuffle/" class="shuffle") Shuffle deck
+            li
+                a(href="/table/#{table._id}/start/" class="start") Start game
+        ul.seats
+            each seat, i in seats
+                if (seat.active)
+                    li.seat.seated
+                        div(class="content")
+                            p Seat #{i}
+                            div(class="pod pod-1")
+                                a(href="/table/#{table._id}/leave/#{i}" class="post") Leave
+                            div(class="pod pod-2")
+                                a(href="/table/#{table._id}/join/#{i}" class="post") Sit
+                else
+                    li.seat
+                        div(class="content") 
+                            p Seat #{i}
+                            div(class="pod pod-1")
+                                a(href="/table/#{table._id}/leave/#{i}" class="post") Leave
+                            div(class="pod pod-2")
+                                a(href="/table/#{table._id}/join/#{i}" class="post") Sit
+        
+
+    

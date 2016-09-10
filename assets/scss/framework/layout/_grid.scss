@@ -1,0 +1,77 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Grid
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+ // Set the width of a grid column amount. i.e, 8 will return 8/12.
+ @mixin grid-column-width($breakpoint, $count: 12) {
+ 	@media (min-width: $breakpoint) {
+ 		width: nth(nth($columns, $count), 2);
+ 	}
+ }
+
+ // Set the margin offset of a grid column amount. i.e, 8 will return 8/12.
+ @mixin grid-column-offset($breakpoint, $count: 12) {
+ 	@media (min-width: $breakpoint) {
+ 		margin-left: nth($columns, $count);
+ 	}
+ }
+
+ // Set the alignment of a grid column. i.e right will float the column right.
+ @mixin grid-column-align($min: 0, $max: 0, $alignment: right) {
+ 	@media (min-width: $min) and (max-width: $max) {
+ 		float: $alignment;
+ 	}
+ }
+
+ // Define the styles for the grid
+ .grid {
+   @include clearfix;
+   font-size: 0;
+   margin: 0 0-$gutters;
+
+   &.collapsed {
+   	margin: 0;
+
+   	.column {
+   		padding: 0;
+   	}
+   }
+
+ 	.column {
+ 		display: inline-block;
+ 		font-size: 1rem;
+ 		padding: 0 $gutters;
+ 		overflow: hidden;
+ 		width: 100%;
+    vertical-align: middle;
+ 	}
+ }
+
+ // Create column alignment styles for each breakpoint
+ @each $label, $min, $max in $breakpoint-ranges {
+ 	.right-#{$label} {
+ 		@include grid-column-align($min: #{$min}, $max: #{$max}, $alignment: right);
+ 	}
+
+ 	.left-#{$label} {
+ 		@include grid-column-align($min: #{$min}, $max: #{$max}, $alignment: left);
+ 	}
+ }
+
+ // Create column width styles for each breakpoint
+ @each $label, $breakpoint in $breakpoints {
+ 	@media (min-width: #{$breakpoint}) {
+ 		@each $value, $column in $columns {
+ 			.grid .column {
+ 				&.#{$label}-#{$value} { width: #{$column}; }
+ 				&.#{$label}-offset-#{$value} { margin-left: #{$column}; }
+ 			}
+ 		}
+ 	}
+ }
+
+ // Conditional styles for IE8 or less.
+ .lte8 .grid .column {
+   font-size: map-get($typography, base size);
+   line-height: map-get($typography, base leading);
+ }

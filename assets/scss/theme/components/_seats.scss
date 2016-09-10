@@ -1,0 +1,30 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Seats
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+.seats {
+    background: #eee;
+    .seat {
+        background: #ddd;
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        float: left;
+        list-style-type: none;
+        text-align: center;
+        .pod-2 {
+            display: block;
+        }
+        .pod-1 {
+            display: none;
+        }
+        &.seated {
+            .pod-2 {
+                display: none;
+            }
+            .pod-1 {
+                display: block;
+            }
+        }
+    }
+}

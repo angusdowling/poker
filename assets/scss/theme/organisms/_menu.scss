@@ -1,0 +1,29 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Menu
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+.menu {
+  &.horizontal {
+    .navigation {
+      &-list {
+        font-size: 0;
+      }
+
+      &-item {
+        @include horizontal(middle);
+      }
+    }
+  }
+
+  .navigation {
+    &-list {
+    }
+
+    &-item {
+    }
+
+    &-link {
+
+    }
+  }
+}
