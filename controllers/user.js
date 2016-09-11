@@ -13,7 +13,8 @@ exports.registerForm = function(req, res) {
 };
 
 exports.register = function(req, res) {
-    Account.register(new Account({ username: req.body.username, chips: 0, banned: false, apikey: req.body.apikey, groups: [] }), req.body.password, function(err, account) {
+    // @TODO: Change chips down to 0 after testing
+    Account.register(new Account({ username: req.body.username, chips: 99999, banned: false, apikey: req.body.apikey, groups: [] }), req.body.password, function(err, account) {
         if (err) {
             return res.render('register', { account: account });
         }

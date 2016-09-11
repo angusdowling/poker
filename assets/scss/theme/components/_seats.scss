@@ -5,26 +5,21 @@
 .seats {
     background: #eee;
     .seat {
-        background: #ddd;
-        border-radius: 50%;
+        float: left;
         width: 150px;
         height: 150px;
-        float: left;
         list-style-type: none;
         text-align: center;
-        .pod-2 {
-            display: block;
-        }
-        .pod-1 {
-            display: none;
-        }
-        &.seated {
-            .pod-2 {
-                display: none;
+        .header {
+            height: 60px;
+            p {
+                margin: 0;
             }
-            .pod-1 {
-                display: block;
-            }
+        }
+        .player {
+            background: #ddd;
+            border-radius: 50%;
+            height: 150px;
         }
     }
 }

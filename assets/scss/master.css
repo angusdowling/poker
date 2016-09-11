@@ -1125,9 +1125,21 @@ p,
     width: 150px;
     height: 150px;
     float: left;
-    list-style-type: none; }
+    list-style-type: none;
+    text-align: center; }
+    .seats .seat .pod-2 {
+      display: block; }
+    .seats .seat .pod-1 {
+      display: none; }
     .seats .seat.seated .pod-2 {
       display: none; }
+    .seats .seat.seated .pod-1 {
+      display: block; }
+
+.table #main .main-area {
+  height: 150px;
+  width: 500px;
+  background: #eee; }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
 *  Pages

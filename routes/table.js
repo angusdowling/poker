@@ -14,10 +14,4 @@ router.post('/:id/:action/:seatid', table.action);
 
 router.post('/:id/:action/', table.action);
 
-// router.post('/:id/leave/:seatid', table.leave);
-
-
-
-// router.post('/:id/start', table.start);
-
 module.exports = router;

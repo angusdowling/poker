@@ -9,7 +9,7 @@ var Account = new Schema({
     chips: Number,
     groups: Array,
     banned: Boolean,
-    seat: Object
+    seat: Schema.Types.Mixed
 });
 
 Account.plugin(passportLocalMongoose);

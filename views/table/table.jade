@@ -1,41 +1,62 @@
 extends ../layout
 
+mixin seat
+    div(class="content") 
+        div(class="player")
+            div(class="player-hand")
+                //- TODO: Insert player hand
+            div(class="player-image")
+                //- TODO: Insert player image
+            div(class="player-actions")
+                //- TODO: Bet, fold, check, etc.
+        div(class="actions")
+            a(href="/table/#{table._id}/leave/#{i}" class="post leave") Leave
+            a(href="/table/#{table._id}/join/#{i}" class="post join") Join
+
 block content
     h3.
-        Tables
-    ul
-        li#table_list_item
-            p Name:   #{table.name}
-            p Type:   #{table.type}
-            p Buyin:  #{table.buyin}
-            p sBlind: #{table.sblind}
-            p bBlind: #{table.bblind}
-            p Status: #{table.status}
+        #{table.name}
+    table
+        thead
+            th Name
+            th Type
+            th Buyin
+            th Small Blind
+            th Big Blind
+            th Status
+        tbody
+            td #{table.name}
+            td #{table.type}
+            td #{table.buyin}
+            td #{table.sblind}
+            td #{table.bblind}
+            td #{table.status}
     
-    div.table
-        ul.actions
-            li
-                a(href="/table/#{table._id}/shuffle/" class="shuffle") Shuffle deck
-            li
-                a(href="/table/#{table._id}/start/" class="start") Start game
-        ul.seats
+    div(class="table")
+        div(id="main")
+            div(class="main-area")
+                div(class="cards")
+                    ul(class="card-list")
+            ul(class="actions")
+                li
+                    a(href="/table/#{table._id}/start/" class="start") Start game
+                li
+                    a(href="/table/#{table._id}/flop/" class="flop") flop
+                li
+                    a(href="/table/#{table._id}/turn/" class="turn") turn
+                li
+                    a(href="/table/#{table._id}/river/" class="river") river
+        ul(class="seats")
             each seat, i in seats
                 if (seat.active)
-                    li.seat.seated
-                        div(class="content")
+                    li(class="seat seated")
+                        div(class="header")
                             p Seat #{i}
-                            div(class="pod pod-1")
-                                a(href="/table/#{table._id}/leave/#{i}" class="post") Leave
-                            div(class="pod pod-2")
-                                a(href="/table/#{table._id}/join/#{i}" class="post") Sit
+                            p #{seat.player}
+                        mixin seat
                 else
-                    li.seat
-                        div(class="content") 
+                    li(class="seat")
+                        div(class="header")
                             p Seat #{i}
-                            div(class="pod pod-1")
-                                a(href="/table/#{table._id}/leave/#{i}" class="post") Leave
-                            div(class="pod pod-2")
-                                a(href="/table/#{table._id}/join/#{i}" class="post") Sit
-        
-
-    
+                        mixin seat
+                        
