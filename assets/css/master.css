@@ -1532,6 +1532,15 @@ p,
 .blog-post {
   position: relative;
 }
+.blog-post.featured {
+  height: 415px;
+}
+.blog-post.big {
+  height: 240px;
+}
+.blog-post.small {
+  height: 160px;
+}
 .blog-post:hover:after, .blog-post:focus:after {
   background-color: rgba(12, 121, 128, 0.5);
 }

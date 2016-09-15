@@ -27,6 +27,18 @@
     &-post {
         position: relative;
 
+        &.featured {
+            height: 415px;
+        }
+
+        &.big {
+            height: 240px;
+        }
+
+        &.small {
+            height: 160px;
+        }
+
         &:hover,
         &:focus {
             &:after {
