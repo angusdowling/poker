@@ -498,7 +498,8 @@ body,
 html {
   font-family: 'Exo', san-serif;
   font-size: 8px;
-  line-height: 1;
+  letter-spacing: 2px;
+  line-height: 1.25;
 }
 @media (min-width: 1025px) {
   body,
@@ -536,7 +537,7 @@ img {
 h1,
 .h1 {
   font-size: 3em;
-  line-height: 1;
+  line-height: 1.11111;
   margin-top: 1em;
   margin-bottom: 0.5em;
 }
@@ -552,41 +553,41 @@ h2,
 h3,
 .h3 {
   font-size: 2em;
-  line-height: 1;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
+  line-height: 1.04167;
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
 }
 
 h4,
 .h4 {
   font-size: 1.75em;
-  line-height: 1;
-  margin-top: 1.14286em;
-  margin-bottom: 0.57143em;
+  line-height: 1.19048;
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
 }
 
 h5,
 .h5 {
   font-size: 1.25em;
   line-height: 1;
-  margin-top: 1.2em;
-  margin-bottom: 0.6em;
+  margin-top: 1.33333em;
+  margin-bottom: 0.66667em;
 }
 
 h6,
 .h6 {
   font-size: 1em;
-  line-height: 1;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
+  line-height: 1.25;
+  margin-top: 1.33333em;
+  margin-bottom: 0.66667em;
 }
 
 p,
 .p {
   font-size: 1em;
-  line-height: 1;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
+  line-height: 1.25;
+  margin-top: 1.33333em;
+  margin-bottom: 0.66667em;
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1522,8 +1523,17 @@ p,
   font-weight: 200;
   text-transform: uppercase;
 }
+.blog .column {
+  vertical-align: top;
+}
+.blog .row {
+  margin-bottom: 15px;
+}
 .blog-post {
   position: relative;
+}
+.blog-post:hover:after, .blog-post:focus:after {
+  background-color: rgba(12, 121, 128, 0.5);
 }
 .blog-post:after {
   content: "";
@@ -1531,9 +1541,13 @@ p,
   top: 0;
   left: 0;
   z-index: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.5);
   width: 100%;
   height: 100%;
+  transition: 300ms background ease-out;
+}
+.blog-image img {
+  width: 100%;
 }
 .blog-content {
   position: absolute;
@@ -1543,11 +1557,20 @@ p,
   z-index: 10;
 }
 .blog-content h2 {
-  margin-top: 0;
+  margin-top: 15px;
+}
+.blog-content h2 a, .blog-content h2 a:link, .blog-content h2 a:visited {
   color: #fff;
 }
 .blog-content p {
   line-height: 20px;
+  font-weight: 200;
+}
+.blog-content .type {
+  font-size: 14px;
+}
+.blog-content a, .blog-content a:link, .blog-content a:visited {
+  color: #39e2ec;
 }
 .blog-content span,
 .blog-content p,

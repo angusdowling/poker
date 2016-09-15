@@ -13,6 +13,7 @@ body,
 html {
   font-family: var($typography, fonts primary);
   font-size: var($typography, base size) - 4 + px;
+  letter-spacing: 2px;
   line-height: leading(1);
 
   @media(min-width: $min-narrow){
