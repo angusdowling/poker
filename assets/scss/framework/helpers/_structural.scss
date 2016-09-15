@@ -16,17 +16,21 @@
 	}
 }
 
+.clearfix {
+	@include clearfix;
+}
+
 @mixin constrained($width: $wide-desktop) {
 	@include clearfix;
 
-	@media(min-width: $min-desktop) {
-		padding: 0;
-	}
-
-	@media(min-width: $min-wide-desktop) {
+	@media(min-width: $width) {
 		margin: 0 auto;
 		width: $width;
 	}
+}
+
+.wrapper {
+	@include constrained($desktop);
 }
 
 @mixin horizontal($alignment) {
@@ -34,3 +38,24 @@
 	vertical-align: $alignment;
 	font-size: 1rem;
 }
+
+.horizontal {
+	@include horizontal(middle);
+}
+
+@mixin verticalCenter($width: 100%, $height: 100%) {
+	display: table;
+	width: $width;
+	height: $height;
+	
+	& > * {
+		display: table-cell;
+		vertical-align: middle;
+	}
+}
+
+.vertical-center {
+	@include verticalCenter();
+}
+
+

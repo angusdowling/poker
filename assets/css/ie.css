@@ -29,6 +29,50 @@
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
  *  Structural
  * - - - - - - - - - - - - - - - - - - - - - - - - */
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before, .clearfix:after {
+  content: " ";
+  display: table;
+}
+.clearfix:after {
+  clear: both;
+}
+
+.wrapper {
+  *zoom: 1;
+}
+.wrapper:before, .wrapper:after {
+  content: " ";
+  display: table;
+}
+.wrapper:after {
+  clear: both;
+}
+@media (min-width: 1200px) {
+  .wrapper {
+    margin: 0 auto;
+    width: 1200px;
+  }
+}
+
+.horizontal {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 1rem;
+}
+
+.vertical-center {
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+.vertical-center > * {
+  display: table-cell;
+  vertical-align: middle;
+}
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
  *  Visual
  * - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -60,7 +104,7 @@
   content: "x";
   display: block;
   border-radius: 50%;
-  font-family: 'Roboto', san-serif;
+  font-family: 'Exo', san-serif;
   font-size: 2em;
   line-height: 100%;
 }
@@ -77,7 +121,7 @@
 .browser-upgrade .browser-upgrade-content .heading {
   margin-bottom: 0.5em;
   font-size: 3em;
-  font-family: 'Roboto', san-serif;
+  font-family: 'Exo', san-serif;
   text-transform: uppercase;
   line-height: 120%;
 }

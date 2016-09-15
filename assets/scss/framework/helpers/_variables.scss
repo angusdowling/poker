@@ -6,12 +6,12 @@
 $baseline: 3;
 $typography: (
   fonts: (
-    primary: unquote("'Roboto', san-serif"),
-    secondary: unquote("'Roboto', serif")
+    primary: unquote("'Exo', san-serif"),
+    secondary: unquote("'Exo', serif")
   ),
 
   base: (
-    size: 20,
+    size: 12,
     leading: 1
   ),
   input: 16px,
@@ -28,17 +28,17 @@ $typography: (
 );
 
 /* Colour */
-$colors: (
-  brand: (
-    1: rgba(0, 0, 0, 1),      // Black
-    2: rgba(255, 255, 255, 1) // White
-  ),
+$color-brand-1: #39e2ec;
+$color-brand-2: #57e697;
+$color-brand-3: #d6d152;
 
-  state: (
-    error: #BD3030,
-    success: #38CE31
-  )
-);
+$color-shade-black: #000;
+$color-shade-white: #fff;
+
+$color-state-warning: $color-brand-3;
+$color-state-success: $color-brand-2;
+$color-state-error: #fff;
+$color-state-neutral: $color-brand-1;
 
 /* Responsive Breakpoints */
 $mobile-small:    320px !default;
@@ -46,7 +46,7 @@ $mobile:          480px !default;
 $phablet:         640px !default;
 $tablet:          768px !default;
 $narrow:          1024px !default;
-$desktop:         1280px !default;
+$desktop:         1200px !default;
 $wide-desktop:    1600px !default;
 
 $min-mobile-small:  $mobile-small + 1;

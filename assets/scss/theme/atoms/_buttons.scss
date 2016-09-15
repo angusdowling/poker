@@ -1,3 +1,29 @@
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
  *  Buttons
  * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+@mixin button($color: $color-brand-1){
+    border: 2px solid $color;
+    display: inline-block;
+    padding: 12px 20px;
+    text-transform: uppercase;
+    font-size: 16px;
+    background-color: rgba($color, 0.1);
+    transition: 300ms background ease-out;
+    min-width: 195px;
+
+    &,
+    &:link,
+    &:visited {
+        color: $color;
+    }
+
+    &:hover,
+    &:focus {
+        background-color: rgba($color, 0.3);
+    }
+}
+
+.button {
+    @include button;
+}

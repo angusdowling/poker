@@ -1,0 +1,38 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Hero
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+.hero {
+    height: 385px;
+    text-align: center;
+    background-image: url('../images/background/hero.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+
+    .wrapper {
+        height: 100%;
+    }
+
+    h1 {
+        color: #F8F8F8;
+        letter-spacing: 3px;
+        text-transform: uppercase; 
+        margin: 0 0 40px;
+    }
+
+    .actions {
+        font-size: 0;
+
+        .item {
+            display: inline-block;
+            vertical-align: middle;
+            font-size: 1rem;
+            margin: 0 8px;
+        }
+
+        .link {
+            
+        }
+    }
+}

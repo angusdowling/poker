@@ -1,3 +1,20 @@
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
  *  Masthead
  * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+.masthead {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    h1 {
+        font-size: 1rem;
+        color: #fff;
+        font-weight: 200;
+        text-transform: uppercase;
+        letter-spacing: 8px;
+        text-align: center;
+        margin: 30px 0;
+    }
+}

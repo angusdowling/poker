@@ -1,12 +1,79 @@
 extends layout
 
+mixin masthead
+  header(class="masthead")
+    div(class="wrapper")
+
+      div(class="content")
+        h1 No Limits Hold'em
+
+        if (user)
+          nav(class="primary")
+            ul(class="list level-1")
+              li(class="item level-1")
+                a(href="#" class="link level-1") Account
+                  ul(class="list level-2")
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Account Management
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Transaction History
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Deposit
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") My Tickets
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Submit a Ticket
+
+              li(class="item level-1")
+                a(href="#" class="link level-1") Support
+                  ul(class="list level-2")
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Getting Started
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Types of games
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Depositing ISK
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Playing your first game
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") FAQ
+
+
+
+mixin hero
+  section(class="hero")
+    div(class="wrapper")
+      div(class="vertical-center")
+        div(class="content")
+          h1(class="h3") Money won is twice as sweet as money earned
+
+          ul(class="actions")
+            if (!user)
+              li(class="item")
+                a(href="/user/register" class="button link") Register
+              li(class="item")
+                a(href="/user/login" class="button link") Sign in
+
+mixin blog
+  section(class="blog")
+    div(class="wrapper")
+      div(class="header")
+        h1 Recent News
+      div(class="grid")
+        div(class="row")
+          div(class="column all-4")
+            article(class="blog-post")
+              div(class="blog-image")
+                img(src="../images/placeholder/blog-1.jpg")
+              div(class="blog-content")
+                span(class="type") Post / Event
+                h2 September Madness
+                span(class="date") September 1st, 2016
+                p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis interdum velit sed enim volutpat ullamcorper. Nam sed...
+                div(class="read-more")
+                  a(href="#") Read more >>>
+
 block content
-  if (!user)
-    a(href="/user/login") Login
-    br
-    a(href="/user/register") Register
-  if (user)
-    p You are currently logged in as #{user.username}
-    a(href="/admin/table/new") New Table
-    a(href="/lobby") Lobby
-    a(href="/user/logout") Logout
+  +masthead
+  +hero
+  +blog

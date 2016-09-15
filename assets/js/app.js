@@ -7,7 +7,7 @@ app.config = {
         },
 
         table: {
-            post: '.actions a'
+            post: '.table .actions a'
         }
     }
 }
@@ -75,21 +75,21 @@ app.table = {
     getCards: function(table) {
         var cards = [table.flop, table.turn, table.river];
 
-        for(var i = 0; i < cards.length; i++){
+        for (var i = 0; i < cards.length; i++) {
             var card = cards[i];
 
-            if(typeof card !== "undefined"){
-                if(card.length > 0){
+            if (typeof card !== "undefined") {
+                if (card.length > 0) {
                     var str = "";
 
                     for (var j = 0; j < card.length; j++) {
                         str += card[j].value + card[j].suit + " ";
                     }
 
-                    $('#main .card-list').append('<li>'+str+'</li>');
+                    $('#main .card-list').append('<li>' + str + '</li>');
                 }
             }
-        } 
+        }
     },
 
     getData: function(obj, url) {
