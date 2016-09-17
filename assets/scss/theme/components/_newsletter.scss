@@ -1,0 +1,49 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Newsletter
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+ .newsletter {
+     height: 210px;
+     text-align: center;
+     background: url('../images/background/newsletter.jpg');
+
+     .wrapper {
+        height: 100%;
+     }
+
+     .header {
+         h1 {
+             color: $color-shade-white;
+             font-size: 14px;
+             font-weight: 200;
+             text-transform: uppercase;
+             margin: 0 0 30px;
+         }
+     }
+
+     &-form {
+         input[type="text"] {
+            width: 400px;
+            border: 2px solid $color-brand-1;
+            display: inline-block;
+            padding: 12px 20px;
+            text-transform: uppercase;
+            font-size: 16px;
+            transition: 300ms background ease-out;
+            min-width: 195px;
+            background-color: transparent;
+            color: $color-brand-1;
+            border-right: 0;
+            height: 44px;
+
+            &:hover,
+            &:focus {
+                background-color: rgba($color-brand-1, 0.1);
+            }
+         }
+
+         input[type="submit"]{
+             @include button;
+         }
+     }
+ }

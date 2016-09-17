@@ -9,12 +9,35 @@ var Table = require('../models/table');
 var Seat = require('../models/seat');
 var Deck = require('../models/deck');
 var Card = require('../models/card');
+var Solver = require('../assets/js/vendor/pokersolver.js');
 
 var app = app || {};
+
+
+/**
+ * Application for Table
+ * 
+ * @namespace app
+ * 
+ * @param config
+ *      Configuration settings for the application. Also stores app wide variables.
+ */
 
 app.config = {
     validBuyin: false
 }
+
+/**
+ * Helper methods
+ * 
+ * @namespace helper
+ * 
+ * @param shuffleArray
+ *      Shuffles a deck of cards (or any array).
+ * 
+ * @param activeSeats
+ *      Find the seats that are occupied
+ */
 
 app.helper = {
     shuffleArray: function(array) {
@@ -36,7 +59,7 @@ app.helper = {
         var arr = [];
 
         for (var i = 0; i < table.seats.length; i++) {
-            if (table.seats[i].active === true) {
+            if (typeof table.seats[i].player === "string") {
                 arr.push(i);
             }
 
@@ -54,6 +77,15 @@ app.helper = {
     }
 };
 
+/**
+ * Table state methods
+ * 
+ * @namespace state
+ * 
+ * @param isError
+ *      For when an error is thrown. prints the error out and exits the function.
+ */
+
 app.state = {
     isError: function(err, table) {
         if (err) {
@@ -66,20 +98,33 @@ app.state = {
                 console.log("Table not found");
             }
 
-            // if (!table.deck) {
-            //     console.log("Deck not found");
-            // }
-
-            // if (!table.deck.cards) {
-            //     console.log("Cards not found");
-            // }
-
             return true;
         }
 
         return false;
     }
 };
+
+/**
+ * User methods (Logged in player interacting with the table, but not a table player)
+ * 
+ * @namespace user
+ * 
+ * @param isLoggedIn
+ *      Check if there is an active session
+ * 
+ *  @param isSeated
+ *      Check if user is seated at the table
+ * 
+ *  @param isSeatPlayer
+ *      Check if user is seated at specific seat (used for gathering sensitive data such as hands that other players shouldn't see)
+ * 
+ *  @param updateChips
+ *      Update the real users total chips (For ring/sit&go tables only. Should not be used for tournament)
+ * 
+ *  @param getBuyin
+ *      Subtract the buyin for the table from the users total chips.
+ */
 
 app.user = {
     isLoggedIn: function(req, res) {
@@ -149,6 +194,24 @@ app.user = {
         });
     }
 };
+
+/**
+ * Table methods
+ * 
+ * @namespace table
+ * 
+ * @param join
+ *      A player joining the table
+ * 
+ *  @param leave
+ *      A player leaving the table
+ * 
+ *  @param shuffle
+ *      Shuffle the deck
+ * 
+ *  @param start
+ *      Start the game
+ */
 
 app.table = {
     join: function(table, seatid, user, response, res) {
@@ -238,6 +301,51 @@ app.table = {
         return res.send(response);
     }
 };
+
+/**
+ * Game methods (Handles when a game has already started and what methods might be associated with that)
+ * 
+ * @namespace game
+ * 
+ * @param resetDeck
+ *      Get a new deck (regenerate all 52 cards)
+ * 
+ *  @param resetHand
+ *      PER HAND: Reset player hand cards.
+ * 
+ *  @param resetTable
+ *      PER HAND: Reset table cards (flop, turn, river).
+ * 
+ *  @param setDealer
+ *      PER HAND: Set the dealer
+ * 
+ *  @param setBlinds
+ *      PER HAND: set blinds
+ * 
+ *  @param deal
+ *      PER HAND: deal cards
+ * 
+ *  @param flop
+ *      PER HAND: get flop cards
+ * 
+ *  @param turn
+ *      PER HAND: get turn card
+ * 
+ *  @param river
+ *      PER HAND: get river card
+ * 
+ *  @param kick
+ *      Kick a player
+ * 
+ *  @param winner
+ *      PER HAND: Find winner
+ * 
+ *  @param sendTableData
+ *      Populate table variable to be sent to the frontend
+ * 
+ *  @param sendPlayerData
+ *      Populate player variable to be sent to the frontend
+ */
 
 app.game = {
     resetDeck: function(table) {
@@ -416,6 +524,7 @@ app.game = {
 
     winner: function() {
         // @TODO: Get the winner of the hand
+        // var winner = Solver.Hand.winners([hand1, hand2]); // hand2
     },
 
     sendTableData: function(table, response) {
@@ -433,6 +542,7 @@ app.game = {
         }
 
         var table = {
+            id: table._id,
             seats: seats,
             flop: table.flop,
             turn: table.turn,
@@ -453,6 +563,10 @@ app.game = {
             return response.player = 'No matching player found on table';
         }
 
+        else {
+            response.user = user.username;
+        }
+
         for (var i = 0; i < table.seats.length; i++) {
             var seat = table.seats[i];
             if (seat.player === user.username) {
@@ -465,16 +579,80 @@ app.game = {
         }
 
         var hand = table.seats[seatid].hand;
+        var active = table.seats[seatid].active;
         var player = table.seats[seatid].player;
+        var solvedhand = [];
 
-        if (user.username === player) {
+        if(hand.length > 0){
+            for(var i = 0; i < hand.length; i++){
+                var card = hand[i].value + hand[i].suit.toLowerCase();
+                solvedhand.push(card);
+            }
+        }
+
+        if(table.flop.length > 0){
+            for(var i = 0; i < table.flop.length; i++){
+                var card = table.flop[i].value + table.flop[i].suit.toLowerCase();
+                solvedhand.push(card);
+            }
+        }
+        
+        if(table.turn.length > 0){
+            var card = table.turn[0].value + table.turn[0].suit.toLowerCase();
+            solvedhand.push(card);
+        }
+
+        if(table.river.length > 0){
+            var card = table.river[0].value + table.river[0].suit.toLowerCase();
+            solvedhand.push(card);
+        }
+
+        if(solvedhand.length > 0){
+            solvedhand = Solver.Hand.solve(solvedhand).descr;
+        }
+
+        if (user.username === player) { 
             response.player = {
                 hand: hand,
-                seatid: seatid
+                solved: solvedhand,
+                seatid: seatid,
+                active: 
             };
         }
+
+        response.response = "Data fetched";
     }
 };
+
+/**
+ * Seat methods (Player actions of a seated user)
+ * 
+ * @namespace seat
+ * 
+ * @param call
+ *      Match the current bet
+ * 
+ *  @param fold
+ *      Fold hand
+ * 
+ *  @param allin
+ *      Push all of the seat chips into the pot
+ * 
+ *  @param check
+ *      Check the current bet
+ * 
+ *  @param bet
+ *      Raise the bet by a specific amount
+ * 
+ *  @param toPot
+ *      Send chips to pot
+ * 
+ *  @param takePot
+ *      Take the pot chips (from winning hand, usually)
+ * 
+ *  @param setPosition
+ *      Set position in relation to the dealer
+ */
 
 app.seat = {
     call: function() {
@@ -495,10 +673,6 @@ app.seat = {
 
     bet: function() {
         // @TODO: Raise bet
-    },
-
-    evaluate: function() {
-        // @TODO: Evaluate the hand
     },
 
     toPot: function(table, seat, chips) {
@@ -566,6 +740,15 @@ app.seat = {
     }
 };
 
+/**
+ * Card methods
+ * 
+ * @namespace card
+ * 
+ * @param random
+ *      Take a random card from the deck, remove it from the deck, and return an array of the cards taken.
+ */
+
 app.card = {
     random: function(table, amount) {
         var arr = [];
@@ -610,10 +793,10 @@ exports.action = function(req, res) {
     var query = { "_id": id };
     var response = { response: "An unknown error has occurred", success: false };
 
-    // if (!app.user.isLoggedIn(req, res)) {
-    //     response.redirect = '/user/login';
-    //     return res.send(response);
-    // }
+    if (!app.user.isLoggedIn(req, res)) {
+        response.redirect = '/user/login';
+        return res.send(response);
+    }
 
     Table.findOne(query, function(err, table) {
         if (app.state.isError(err, table)) {
@@ -656,6 +839,10 @@ exports.action = function(req, res) {
 
         if (action === "river") {
             return app.game.river(table, response, res);
+        }
+
+        if (action === "winner") {
+            return app.game.rankPokerHand(table, response, res);
         }
 
 

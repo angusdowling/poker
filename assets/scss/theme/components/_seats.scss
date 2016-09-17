@@ -2,24 +2,3 @@
  *  Seats
  * - - - - - - - - - - - - - - - - - - - - - - - - */
 
-.seats {
-    background: #eee;
-    .seat {
-        float: left;
-        width: 150px;
-        height: 150px;
-        list-style-type: none;
-        text-align: center;
-        .header {
-            height: 60px;
-            p {
-                margin: 0;
-            }
-        }
-        .player {
-            background: #ddd;
-            border-radius: 50%;
-            height: 150px;
-        }
-    }
-}

@@ -1,17 +1,17 @@
 extends ../layout
 
-mixin seat
-    div(class="content") 
+mixin seat(seat)
+    div(class="seat-content") 
         div(class="player")
+            div(class="player-header")
+                if(seat.player)
+                    p #{seat.player}
+                    if (table.status == "Started")
+                        p(class="chips")
+                            strong #{seat.chips}
             div(class="player-hand")
-                //- TODO: Insert player hand
-            div(class="player-image")
-                //- TODO: Insert player image
-            div(class="player-actions")
-                //- TODO: Bet, fold, check, etc.
-        div(class="actions")
-            a(href="/table/#{table._id}/leave/#{i}" class="post leave") Leave
-            a(href="/table/#{table._id}/join/#{i}" class="post join") Join
+            div(class="player-actions") 
+                a(href="#" class="state")
 
 block content
     h3.
@@ -31,32 +31,38 @@ block content
             td #{table.sblind}
             td #{table.bblind}
             td #{table.status}
+
+    ul(class="table-actions")
+        li
+            a(href="start/" class="start") Start game
+        li
+            a(href="flop/" class="flop") flop
+        li
+            a(href="turn/" class="turn") turn
+        li
+            a(href="river/" class="river") river    
+        li
+            a(href="winner/" class="winner") winner
     
     div(class="table")
-        div(id="main")
-            div(class="main-area")
-                div(class="cards")
-                    ul(class="card-list")
-            ul(class="actions")
-                li
-                    a(href="/table/#{table._id}/start/" class="start") Start game
-                li
-                    a(href="/table/#{table._id}/flop/" class="flop") flop
-                li
-                    a(href="/table/#{table._id}/turn/" class="turn") turn
-                li
-                    a(href="/table/#{table._id}/river/" class="river") river
-        ul(class="seats")
-            each seat, i in seats
-                if (seat.active)
-                    li(class="seat seated")
-                        div(class="header")
-                            p Seat #{i}
-                            p #{seat.player}
-                        mixin seat
-                else
-                    li(class="seat")
-                        div(class="header")
-                            p Seat #{i}
-                        mixin seat
-                        
+        div(class="wrapper")
+            div(class="table-backdrop")
+            div(class="table-seats")
+                div(class="grid")
+                    div(class="row")
+                        each seat, i in seats
+                            div(class="column all-fifth")
+                                if (seat.active)
+                                    if(seat.dealer)
+                                        div(class="seat seated dealer")
+                                            div(class="vertical-center")
+                                                +seat(seat)
+                                    else
+                                        div(class="seat seated")
+                                            div(class="vertical-center")
+                                                +seat(seat)
+                                else
+                                    div(class="seat")
+                                        div(class="vertical-center")
+                                            +seat(seat)
+            div(class="table-cards")      

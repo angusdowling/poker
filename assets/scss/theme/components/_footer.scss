@@ -1,0 +1,32 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Footer
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+
+ .footer {
+     background-color: $color-shade-black;
+     padding: 20px 0;
+
+     &-menu {
+        .list {
+            text-align: center;
+            font-size: 0;
+        }
+
+        .item {
+            @include horizontal(middle);
+            margin: 0 8px;
+            font-size: 1rem;
+        }
+
+        .link {
+            text-transform: uppercase;
+            font-weight: 200;
+
+            &,
+            &:link,
+            &:visited {
+                color: $color-shade-white;
+            }
+        }
+     }
+ }

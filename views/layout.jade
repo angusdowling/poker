@@ -1,3 +1,51 @@
+mixin masthead
+  header(class="masthead")
+    div(class="wrapper")
+
+      div(class="content")
+        h1 No Limits Hold'em
+
+        if (user)
+          nav(class="primary")
+            ul(class="list level-1")
+              li(class="item level-1")
+                a(href="#" class="link level-1") Account
+                  ul(class="list level-2")
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Account Management
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Transaction History
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Deposit
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") My Tickets
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Submit a Ticket
+
+              li(class="item level-1")
+                a(href="#" class="link level-1") Support
+                  ul(class="list level-2")
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Getting Started
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Types of games
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Depositing ISK
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") Playing your first game
+                    li(class="item level-2")
+                      a(href="#" class="link level-2") FAQ
+
+mixin footer
+  div(class="footer")
+    div(class="wrapper")
+      nav(class="footer-menu")
+        ul(class="list")
+          li(class="item")
+            a(href="#" class="link") Privacy Policy 
+          li(class="item")
+            a(href="#" class="link") Terms &amp; Conditions 
+
 doctype html
 html
   head
@@ -6,7 +54,9 @@ html
     link(href="https://fonts.googleapis.com/css?family=Exo:100,200,300,400,500,600,700,800,900" rel="stylesheet")
     link(rel='stylesheet', href='/css/master.css')
   body
+    +masthead
     block content
+    +footer
 
   script(src='http://code.jquery.com/jquery.js')
   script(src='/js/app.js')

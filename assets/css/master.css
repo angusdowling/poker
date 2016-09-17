@@ -488,10 +488,12 @@ textarea {
  * - - - - - - - - - - - - - - - - - - - - - - - - */
 html {
   box-sizing: border-box;
+  -moz-box-sizing: border-box;
 }
 
 *, *:before, *:after {
-  box-sizing: inherit;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
 }
 
 body,
@@ -1450,6 +1452,7 @@ p,
   background-color: rgba(57, 226, 236, 0.1);
   transition: 300ms background ease-out;
   min-width: 195px;
+  cursor: pointer;
 }
 .button, .button:link, .button:visited {
   color: #39e2ec;
@@ -1467,6 +1470,11 @@ p,
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
  *  Table
  * - - - - - - - - - - - - - - - - - - - - - - - - */
+table td,
+table th {
+  padding: 0 20px;
+}
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
  *  Type
  * - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -1620,42 +1628,200 @@ p,
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Footer
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+.footer {
+  background-color: #000;
+  padding: 20px 0;
+}
+.footer-menu .list {
+  text-align: center;
+  font-size: 0;
+}
+.footer-menu .item {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 1rem;
+  margin: 0 8px;
+  font-size: 1rem;
+}
+.footer-menu .link {
+  text-transform: uppercase;
+  font-weight: 200;
+}
+.footer-menu .link, .footer-menu .link:link, .footer-menu .link:visited {
+  color: #fff;
+}
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  Newsletter
+ * - - - - - - - - - - - - - - - - - - - - - - - - */
+.newsletter {
+  height: 210px;
+  text-align: center;
+  background: url("../images/background/newsletter.jpg");
+}
+.newsletter .wrapper {
+  height: 100%;
+}
+.newsletter .header h1 {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 200;
+  text-transform: uppercase;
+  margin: 0 0 30px;
+}
+.newsletter-form input[type="text"] {
+  width: 400px;
+  border: 2px solid #39e2ec;
+  display: inline-block;
+  padding: 12px 20px;
+  text-transform: uppercase;
+  font-size: 16px;
+  transition: 300ms background ease-out;
+  min-width: 195px;
+  background-color: transparent;
+  color: #39e2ec;
+  border-right: 0;
+  height: 44px;
+}
+.newsletter-form input[type="text"]:hover, .newsletter-form input[type="text"]:focus {
+  background-color: rgba(57, 226, 236, 0.1);
+}
+.newsletter-form input[type="submit"] {
+  border: 2px solid #39e2ec;
+  display: inline-block;
+  padding: 12px 20px;
+  text-transform: uppercase;
+  font-size: 16px;
+  background-color: rgba(57, 226, 236, 0.1);
+  transition: 300ms background ease-out;
+  min-width: 195px;
+  cursor: pointer;
+}
+.newsletter-form input[type="submit"], .newsletter-form input[type="submit"]:link, .newsletter-form input[type="submit"]:visited {
+  color: #39e2ec;
+}
+.newsletter-form input[type="submit"]:hover, .newsletter-form input[type="submit"]:focus {
+  background-color: rgba(57, 226, 236, 0.3);
+}
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - -
  *  Menu
  * - - - - - - - - - - - - - - - - - - - - - - - - */
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
  *  Seats
  * - - - - - - - - - - - - - - - - - - - - - - - - */
-.seats {
-  background: #eee;
+.table {
+  background-image: url("../images/background/ship-bg.jpg");
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
-.seats .seat {
-  float: left;
-  width: 150px;
-  height: 150px;
-  list-style-type: none;
+.table .wrapper {
+  position: relative;
+}
+.table-backdrop {
+  min-height: 600px;
+  background-image: url("../images/table/table.png");
+  background-position: center center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+.table-cards {
+  position: absolute;
+  left: calc(50% - 250px);
+  top: calc(50% - 75px);
+}
+.table-cards .card {
+  max-width: 100px;
+  margin-right: 5px;
+  box-shadow: 3px 2px 7px 0px rgba(0, 0, 0, 0.09);
+}
+.table-seats {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
   text-align: center;
 }
-.seats .seat .header {
-  height: 60px;
-}
-.seats .seat .header p {
+.table-seats .header p {
   margin: 0;
 }
-.seats .seat .player {
-  background: #ddd;
-  border-radius: 50%;
-  height: 150px;
+.table-seats .grid,
+.table-seats .row {
+  height: 100%;
 }
-
-table td,
-table th {
-  padding: 0 20px;
+.table-seats .column {
+  overflow: initial;
+  vertical-align: top;
+  height: 50%;
+  position: relative;
 }
-
-.table #main .main-area {
-  height: 150px;
-  margin: 20px;
+.table-seats .column:nth-child(1) .seat, .table-seats .column:nth-child(5) .seat, .table-seats .column:nth-child(6) .seat, .table-seats .column:nth-child(10) .seat {
+  margin: 100px 0 0;
+}
+.table-seats .column:nth-child(5) .seat, .table-seats .column:nth-child(10) .seat {
+  margin: 100px 0 0 auto;
+}
+.table-seats .column:nth-child(2), .table-seats .column:nth-child(3), .table-seats .column:nth-child(4) {
+  margin-top: 20px;
+}
+.table-seats .column:nth-child(7) .seat, .table-seats .column:nth-child(8) .seat, .table-seats .column:nth-child(9) .seat {
+  margin-top: calc(100% - 35px);
+}
+.table-seats .seat {
+  width: 170px;
+  height: 70px;
+  margin: 0 auto;
   background: #eee;
+  border-radius: 15px;
+  box-shadow: 1px 0px 10px -5px rgba(0, 0, 0, 0.71), rgba(0, 0, 0, 0.16) 0px -5px 9px -4px inset, rgba(255, 255, 255, 0.7) 0px 6px 5px -3px inset;
+  position: relative;
+  border: 1px solid #c7c7c7;
+}
+.table-seats .seat.dealer:before {
+  content: "D";
+  position: absolute;
+  display: block;
+  color: #39e2ec;
+  line-height: 30px;
+  height: 30px;
+  width: 30px;
+  text-align: center;
+  font-weight: 600;
+  border-radius: 50%;
+  border: 1px solid #39e2ec;
+  bottom: calc(100% + 85px);
+  left: 50%;
+  font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.4);
+}
+.table-seats .seat .player-header {
+  overflow: hidden;
+  text-transform: uppercase;
+}
+.table-seats .seat .player-header p {
+  margin: 0;
+}
+.table-seats .seat .player-header p.chips {
+  font-size: 16px;
+}
+.table-seats .seat .player-actions .state {
+  font-size: 16px;
+  font-weight: 500;
+}
+.table-seats .seat .player-hand {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 10px;
+}
+.table-seats .seat .player-hand .card {
+  display: inline-block;
+  width: calc(50% - 30px);
+  margin: 0 2px;
+  box-shadow: 3px 2px 7px 0px rgba(0, 0, 0, 0.09);
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - -
