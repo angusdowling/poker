@@ -10,8 +10,10 @@ var table = require('../controllers/table');
  */
 router.get('/:id', table.index);
 
+router.post('/:id/:action/', table.action);
+
 router.post('/:id/:action/:seatid', table.action);
 
-router.post('/:id/:action/', table.action);
+router.post('/:id/:action/:seatid/:chips', table.action);
 
 module.exports = router;

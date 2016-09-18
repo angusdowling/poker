@@ -8,7 +8,10 @@ var Seat = new Schema({
     actions: Array,
     hand: Array,
     chips: Number,
-    position: Number
+    position: Number,
+    index: Number,
+    bet: Number,
+    last: String
 }, { strict: false });
 
 module.exports = mongoose.model('Seat', Seat);

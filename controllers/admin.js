@@ -41,7 +41,9 @@ exports.newTable = function(req, res) {
             dealer: false,
             chips: 0,
             actions: ["call", "fold", "allin", "check", "bet", "join", "exit"],
-            hand: []
+            hand: [],
+            index: i,
+            bet: 0
         });
 
         seats.push(seat);

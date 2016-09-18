@@ -13,6 +13,36 @@ mixin seat(seat)
             div(class="player-actions") 
                 a(href="#" class="state")
 
+mixin chat
+    div(class="table-chat")
+
+mixin history
+    div(class="table-history")
+
+mixin actions
+    div(class="table-actions")
+        ul(class="list")
+            li(class="item")
+                form(action="bet/" id="bet-form")
+                    input(type="submit" class="button bet" value="Bet")
+                    input(type="number" value="0" id="amount" name="amount")
+            li(class="item")
+                a(href="check/" class="button check") Check
+            li(class="item")
+                a(href="fold/" class="button fold") Fold
+
+mixin table-footer
+    div(class="table-footer")
+        div(class="wrapper")
+            div(class="grid")
+                div(class="row")
+                    div(class="column all-4")
+                        +chat
+                    div(class="column all-4")
+                        +history
+                    div(class="column all-4")
+                        +actions
+
 block content
     h3.
         #{table.name}
@@ -23,6 +53,7 @@ block content
             th Buyin
             th Small Blind
             th Big Blind
+            th Pot
             th Status
         tbody
             td #{table.name}
@@ -30,6 +61,7 @@ block content
             td #{table.buyin}
             td #{table.sblind}
             td #{table.bblind}
+            td #{table.pot}
             td #{table.status}
 
     ul(class="table-actions")
@@ -52,7 +84,7 @@ block content
                     div(class="row")
                         each seat, i in seats
                             div(class="column all-fifth")
-                                if (seat.active)
+                                if (seat.player !== null)
                                     if(seat.dealer)
                                         div(class="seat seated dealer")
                                             div(class="vertical-center")
@@ -65,4 +97,5 @@ block content
                                     div(class="seat")
                                         div(class="vertical-center")
                                             +seat(seat)
-            div(class="table-cards")      
+            div(class="table-cards")
+    +table-footer

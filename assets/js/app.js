@@ -20,7 +20,10 @@ app.config = {
     user: null,
     buttons: {
         seat: {
-            post: '.seat .state'
+            post: '.seat .state',
+            bet: '.seat .bet',
+            fold: '.seat .fold',
+            check: '.seat .check'
         },
 
         table: {
@@ -42,6 +45,25 @@ app.listeners = function() {
 
     $(app.config.buttons.table.post).on('click', function(e) {
         app.table.getData($(this));
+        e.preventDefault();
+    });
+
+    $(app.config.buttons.seat.check).on('click', function(e) {
+        app.table.getData(false, "check/" + app.config.player.seatid);
+        e.preventDefault();
+    });
+
+    $(app.config.buttons.seat.fold).on('click', function(e) {
+        app.table.getData(false, "fold/" + app.config.player.seatid);
+        e.preventDefault();
+    });
+
+    $('#bet-form').on('submit', function(e){
+        var bet = parseInt($('#amount').val(), 10);
+
+        console.log(bet);
+
+        app.table.getData(false, "bet/" + app.config.player.seatid + "/" + bet);
         e.preventDefault();
     });
 };
@@ -101,6 +123,18 @@ app.seat = {
             if(seat.player == null){
                 state.attr('href', join);
                 state.html('Join');
+            }
+        }
+    },
+
+    setActive: function(){
+        var seatList = app.config.table.seats;
+        var seats = $('.seat');
+        for(var i = 0; i < seatList.length; i++){
+            var seat = seatList[i];
+            
+            if(seat.active){
+                seats.eq(i).addClass('active');
             }
         }
     },
@@ -188,14 +222,17 @@ app.table = {
             app.config.user = data.user;
         }
 
-        console.log(data);
-
         // Do stuff for table
         if (typeof data.table !== "undefined") {
             app.config.table = data.table;
             app.table.getCards(data.table);
             app.seat.action();
+            app.seat.setActive();
         }
+
+        
+
+        console.log(data);
     
     },
 

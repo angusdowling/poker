@@ -35,8 +35,9 @@ app.config = {
  * @param shuffleArray
  *      Shuffles a deck of cards (or any array).
  * 
- * @param activeSeats
+ * @param filledSeats
  *      Find the seats that are occupied
+ *      @return arr with seatid's (e.g [1, 5, 7])
  */
 
 app.helper = {
@@ -55,11 +56,11 @@ app.helper = {
         return array;
     },
 
-    activeSeats: function(table) {
+    filledSeats: function(table) {
         var arr = [];
 
         for (var i = 0; i < table.seats.length; i++) {
-            if (typeof table.seats[i].player === "string") {
+            if (table.seats[i].player !== null) {
                 arr.push(i);
             }
 
@@ -128,6 +129,7 @@ app.state = {
 
 app.user = {
     isLoggedIn: function(req, res) {
+        console.log('isloggedin');
         if (typeof req.user === "undefined") {
             return false;
         }
@@ -136,6 +138,7 @@ app.user = {
     },
 
     isSeated: function(table, seatid, user) {
+        console.log('isseated');
         var seat = table.seats[seatid];
 
         for (var i = 0; i < table.seats.length; i++) {
@@ -149,6 +152,7 @@ app.user = {
     },
 
     isSeatPlayer: function(table, seatid, user) {
+        console.log('isseatplayer');
         var seat = table.seats[seatid];
 
         if (seat.player !== user.username) {
@@ -159,6 +163,7 @@ app.user = {
     },
 
     updateChips: function(username, chips) {
+        console.log('updatechips');
         var query = { "username": username };
 
         Account.findOne(query, function(err, user) {
@@ -173,6 +178,7 @@ app.user = {
     },
 
     getBuyin: function(table, seat, callback) {
+        console.log('getbuyin');
         var query = { "username": seat.player };
         app.config.validBuyin = false;
 
@@ -215,6 +221,8 @@ app.user = {
 
 app.table = {
     join: function(table, seatid, user, response, res) {
+        console.log('join');
+        // TODO: Make it impossible to join a table if insufficent chips available
         if (app.user.isSeated(table, seatid, user)) {
             response.response = "Player is already seated at this table";
             return res.send(response);
@@ -223,7 +231,6 @@ app.table = {
         var seat = table.seats[seatid];
 
         seat.player = user.username;
-        seat.active = true;
         table.markModified('seats');
         table.save();
 
@@ -236,6 +243,7 @@ app.table = {
     },
 
     leave: function(table, seatid, user, response, res) {
+        console.log('leave');
         if (!app.user.isSeatPlayer(table, seatid, user)) {
             response.response = "Player does not match seat player";
             return res.send(response);
@@ -244,7 +252,6 @@ app.table = {
         var seat = table.seats[seatid];
 
         seat.player = null;
-        seat.active = false;
         table.markModified('seats');
         table.save();
 
@@ -257,6 +264,7 @@ app.table = {
     },
 
     shuffle: function(table, seatid, user, response, res) {
+        console.log('shuffle');
         table.deck.cards = app.helper.shuffleArray(table.deck.cards);
 
         table.markModified('deck');
@@ -273,21 +281,22 @@ app.table = {
     },
 
     start: function(table, user, response, res) {
-        var activeSeats = app.helper.activeSeats(table);
+        var filledSeats = app.helper.filledSeats(table);
 
-        if (activeSeats) {
+        if (filledSeats.length > 0) {
             table.status = "Started";
 
             // Get buyin
-            for (var i = 0; i < table.seats.length; i++) {
-                var seat = table.seats[i];
-                if (seat.active) {
-                    app.user.getBuyin(table, seat);
+            for (var i = 0; i < filledSeats.length; i++) {
+                var seat = table.seats[filledSeats[i]];
 
-                    if (seat.chips !== table.buyin) {
-                        seat.chips = table.buyin;
-                    }
+                app.user.getBuyin(table, seat);
+
+                if (seat.chips !== table.buyin) {
+                    seat.chips = table.buyin;
                 }
+
+                seat.bet = 0;
             }
 
             table.markModified('seats');
@@ -297,7 +306,11 @@ app.table = {
             app.game.deal(table, user, response, res);
         }
 
-        response.response = "No seats filled";
+        else {
+            response.response = "No seats filled";
+        }
+
+        
         return res.send(response);
     }
 };
@@ -349,6 +362,8 @@ app.table = {
 
 app.game = {
     resetDeck: function(table) {
+        console.log('resetdeck');
+
         var cardValues = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
         var cardSuits = ["H", "D", "C", "S"];
         var cards = [];
@@ -374,8 +389,13 @@ app.game = {
     },
 
     resetHand: function(table) {
+        // TODO: rename.. turning more into a "resetPlayer".
+
         for (var i = 0; i < table.seats.length; i++) {
+            table.seats[i].active = false;
             table.seats[i].hand = [];
+            table.seats[i].bet = 0;
+            table.seats[i].last = null;
         }
 
         table.markModified('seats');
@@ -383,6 +403,8 @@ app.game = {
     },
 
     resetTable: function(table) {
+        console.log('resettable');
+
         table.flop = [];
         table.turn = [];
         table.river = [];
@@ -390,48 +412,78 @@ app.game = {
     },
 
     setDealer: function(table) {
-        var activeSeats = app.helper.activeSeats(table);
+        console.log('setdealer');
+
+        var filledSeats = app.helper.filledSeats(table);
         // TODO: Turn floor into round
-        var dealer = Math.floor(Math.random() * activeSeats.length);
+        var dealer = Math.floor(Math.random() * filledSeats.length);
 
         for (var i = 0; i < table.seats.length; i++) {
             table.seats[i].dealer = false;
         }
 
-        table.seats[activeSeats[dealer]].dealer = true;
+        table.seats[filledSeats[dealer]].dealer = true;
 
         table.markModified('seats');
         table.markModified('deck');
         table.save();
     },
 
-    setBlinds: function(table) {
+    setBlinds: function(table) {                                                                 
         for (var i = 0; i < table.seats.length; i++) {
             var seat = table.seats[i];
 
             if (typeof seat.player === "string") {
+                var config;
+
                 if (seat.position === 1) {
-                    app.seat.toPot(table, seat, table.sblind);
+                    config = {
+                        chips: table.sblind,
+                        pot: false,
+                        blind: true
+                    }
                 }
 
-                if (seat.position === 2) {
-                    app.seat.toPot(table, seat, table.bblind);
+                if (seat.position === 2) {     
+                    config = {
+                        chips: table.bblind,
+                        pot: false,
+                        blind: true
+                    }
+
+                    var nextSeat = app.seat.nextSeat(table, seat);
+                    app.game.setActiveSeat(table, nextSeat);
+                }
+
+                if(seat.position === 1 | seat.position === 2){
+                    app.seat.bet(table, seat, config);
                 }
             }
         }
     },
 
+    setActiveSeat: function(table, seat){
+        var filledSeats = app.helper.filledSeats(table);
+        
+        seat.active = true;
+
+        table.markModified('active');
+        table.save();
+    },
+
     deal: function(table, user, response, res) {
-        var activeSeats = app.helper.activeSeats(table);
+        console.log('deal');
+
+        var filledSeats = app.helper.filledSeats(table);
         app.game.resetDeck(table);
         app.game.resetHand(table);
         app.game.resetTable(table);
         app.seat.setPosition(table);
-        app.game.setBlinds(table);
+        app.game.setBlinds(table); 
 
         // Hands
-        for (var i = 0; i < activeSeats.length; i++) {
-            var seat = activeSeats[i];
+        for (var i = 0; i < filledSeats.length; i++) {
+            var seat = filledSeats[i];
             var cards = app.card.random(table, 2);
             var cardArr = [];
 
@@ -535,7 +587,9 @@ app.game = {
                 player: table.seats[i].player,
                 dealer: table.seats[i].dealer,
                 chips: table.seats[i].chips,
-                position: table.seats[i].position
+                position: table.seats[i].position,
+                active: table.seats[i].active,
+                bet: table.seats[i].bet
             }
 
             seats.push(seat);
@@ -616,7 +670,7 @@ app.game = {
                 hand: hand,
                 solved: solvedhand,
                 seatid: seatid,
-                active: 
+                active: active
             };
         }
 
@@ -671,22 +725,35 @@ app.seat = {
         // @TODO: Check current bet
     },
 
-    bet: function() {
-        // @TODO: Raise bet
-    },
+    bet: function(table, seat, config) {
+        var chips = config.chips;
+        var blind = config.blind;
+        var pot   = config.pot;
 
-    toPot: function(table, seat, chips) {
-        console.log("seat chips", seat.chips);
-        console.log("seat usermnae", seat.player);
-        console.log("chips", chips);
+        if(!seat.active && !blind){
+            return console.log("User is not active");
+        }
 
         if (seat.chips > chips) {
-            console.log("Chips transferred to pot");
             seat.chips = seat.chips - chips;
-            table.pot = table.pot + chips;
+            
+            if(pot){
+                table.pot = table.pot + chips;      
+            }
+
+            else {
+                seat.bet = parseInt(seat.bet, 10) + parseInt(chips, 10);
+            }
+
         } else {
             console.log("Seat does not have enough chips available for this transaction");
             // @TODO: Kick player from table or something?
+        }
+
+        if(!blind){
+            var nextSeat = app.seat.nextSeat(table, seat);
+            seat.active = false;
+            app.game.setActiveSeat(table, nextSeat);
         }
 
         table.markModified('seats');
@@ -695,6 +762,7 @@ app.seat = {
     },
 
     takePot: function(table, seat) {
+        console.log('take pot');
         seat.chips = seat.chips + table.pot;
         table.pot = 0;
 
@@ -703,15 +771,83 @@ app.seat = {
         table.save();
     },
 
+    highestBet: function(table){
+        var highest = 0;
+
+        for(var i = 0; i < table.seats.length; i++){
+            var seat = table.seats[i];
+
+            if(seat.bet > highest){
+                highest = seat.bet;
+            }
+        }
+
+        return highest;
+    },
+
+    playerAction: function(table, response, res, seatid, chips, action){
+        var seat = table.seats[seatid];
+        var highestBet = app.seat.highestBet(table);
+        var allowedActions = [];
+
+        if(seat.last !== null){
+            if(highestBet > seat.bet){
+                allowedActions = ["bet", "fold"];
+            }
+
+            else if(highestBet === seat.bet) {
+                // TODO: End round
+            }
+        }
+
+        else {
+            if(highestBet > seat.bet){
+                allowedActions = ["bet", "fold"];
+            }
+
+            else if(highestBet === seat.bet) {
+                allowedActions = ["bet", "fold", "check"];
+            }
+        }
+
+        console.log("highest bet", highestBet);
+        console.log("allowedActions",  allowedActions);
+        console.log(seat.last !== null);
+        console.log(highestBet > seat.bet);
+        console.log(highestBet === seat.bet);
+
+
+        if(allowedActions.indexOf(action) !== -1){
+            seat.last = action;
+
+            if(action === "bet"){
+                config = { chips: chips, pot: false, blind: false };
+                app.seat.bet(table, seat, config);
+            }
+
+            table.markModified('seats');
+            table.save();
+        }
+
+        else {
+            console.log("Unable to perform action");
+        }
+    },
+
     setPosition: function(table) {
+        console.log('set position');
         var counter = 0;
 
         for (var i = 0; i < table.seats.length; i++) {
             var seat = table.seats[i];
+
+            // Allowed position for the dealer button
             var allowedPositions = [0, 2];
 
             if (typeof seat.player === "string") {
                 if (seat.dealer === true) {
+
+                    // If this is not an allowed position for the dealer, end loop here.
                     if (allowedPositions.indexOf(counter) === -1) {
                         return;
                     }
@@ -719,10 +855,12 @@ app.seat = {
                     seat.position = counter;
                     counter++;
 
+                    // If the dealer has been set to position 2, this means there's less than 3 players. End loop here.
                     if (seat.position === 2) {
                         return;
                     }
                 } else {
+                    // If not dealer, and not position 1 (reserved for dealer only), then set position of seat.
                     if (counter > 0) {
                         seat.position = counter;
                         counter++;
@@ -730,6 +868,7 @@ app.seat = {
                 }
             }
 
+            // Reset loop if we haven't finished
             if (i === table.seats.length - 1) {
                 i = -1;
             }
@@ -737,6 +876,23 @@ app.seat = {
 
         table.markModified('seats');
         table.save();
+    },
+
+    nextSeat: function(table, seat){
+        var filledSeats = app.helper.filledSeats(table);
+
+        for(var i = 0; i < filledSeats.length; i++){
+            var filledseat = filledSeats[i];
+            if(seat.index == filledseat){
+                if(typeof filledSeats[i+1] !== "undefined"){
+                    return table.seats[filledSeats[i+1]];
+                }
+
+                else {
+                    return table.seats[filledSeats[0]];
+                }
+            }
+        }
     }
 };
 
@@ -788,6 +944,7 @@ exports.index = function(req, res) {
 exports.action = function(req, res) {
     var action = req.params['action'];
     var id = req.params['id'];
+    var chips = req.params['chips'];
     var seatid = req.params['seatid'];
     var user = req.user;
     var query = { "_id": id };
@@ -841,9 +998,13 @@ exports.action = function(req, res) {
             return app.game.river(table, response, res);
         }
 
-        if (action === "winner") {
-            return app.game.rankPokerHand(table, response, res);
+        if (action === "bet") {
+            return app.seat.playerAction(table, response, res, seatid, chips, action);
         }
+
+        // if (action === "winner") {
+        //     return app.game.rankPokerHand(table, response, res);
+        // }
 
 
         return res.send(response);
