@@ -21,9 +21,9 @@ app.config = {
     buttons: {
         seat: {
             post: '.seat .state',
-            bet: '.seat .bet',
-            fold: '.seat .fold',
-            check: '.seat .check'
+            bet: '.bet',
+            fold: '.fold',
+            check: '.check'
         },
 
         table: {
@@ -49,22 +49,29 @@ app.listeners = function() {
     });
 
     $(app.config.buttons.seat.check).on('click', function(e) {
-        app.table.getData(false, "check/" + app.config.player.seatid);
-        e.preventDefault();
+        if(app.config.player !== null){
+            app.table.getData(false, "check/" + app.config.player.seatid);
+        }
+
+        return false;
     });
 
     $(app.config.buttons.seat.fold).on('click', function(e) {
-        app.table.getData(false, "fold/" + app.config.player.seatid);
-        e.preventDefault();
+        if(app.config.player !== null){
+            app.table.getData(false, "fold/" + app.config.player.seatid);
+        }
+        
+        return false;
     });
 
     $('#bet-form').on('submit', function(e){
         var bet = parseInt($('#amount').val(), 10);
 
-        console.log(bet);
+        if(app.config.player !== null){
+            app.table.getData(false, "bet/" + app.config.player.seatid + "/" + bet);
+        }
 
-        app.table.getData(false, "bet/" + app.config.player.seatid + "/" + bet);
-        e.preventDefault();
+        return false;
     });
 };
 
@@ -205,9 +212,9 @@ app.table = {
 
     callback: function(data){
         // Redirect if a redirect is assigned
-        if (typeof data.redirect === "string") {
-            return window.location.replace(window.location.protocol + "//" + window.location.host + data.redirect);
-        }
+        // if (typeof data.redirect === "string") {
+        //     return window.location.replace(window.location.protocol + "//" + window.location.host + data.redirect);
+        // }
 
         // Do stuff for player
         if (typeof data.player !== "undefined") {
@@ -230,10 +237,7 @@ app.table = {
             app.seat.setActive();
         }
 
-        
-
         console.log(data);
-    
     },
 
     getData: function(obj, url) {
@@ -241,13 +245,17 @@ app.table = {
             var url = obj.attr('href');
         }
 
+        console.log(url);
+
         $.ajax({
             method: "POST",
             url: url,
             datatype: "json",
         }).success(function(data) {        
             app.table.callback(data);
-        });
+        }).error(function(err){
+            console.log(err);
+        })
     }
 };
 

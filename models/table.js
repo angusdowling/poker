@@ -13,7 +13,8 @@ var Table = new Schema({
     deck: Schema.Types.Mixed,
     flop: Array,
     turn: Array,
-    river: Array
+    river: Array,
+    round: Number
 }, { strict: false });
 
 module.exports = mongoose.model('Table', Table);

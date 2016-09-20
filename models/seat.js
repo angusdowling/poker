@@ -11,7 +11,8 @@ var Seat = new Schema({
     position: Number,
     index: Number,
     bet: Number,
-    last: String
+    last: String,
+    inhand: Boolean
 }, { strict: false });
 
 module.exports = mongoose.model('Seat', Seat);

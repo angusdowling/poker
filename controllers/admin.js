@@ -26,6 +26,7 @@ exports.newTable = function(req, res) {
         sblind: req.body.sblind,
         bblind: req.body.bblind,
         pot: 0,
+        round: 0,
         status: 'Open',
         deck: {}
     });
