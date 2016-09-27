@@ -4,14 +4,15 @@ mixin seat(seat)
     div(class="seat-content") 
         div(class="player")
             div(class="player-header")
-                if(seat.player)
-                    p #{seat.player}
-                    if (table.status == "Started")
-                        p(class="chips")
-                            strong #{seat.chips}
+                p(class="username") #{seat.player}
+                p(class="chips")
+                    strong #{seat.chips}
+                p(class="bet")
+                    if(seat.bet > 1)
+                        strong #{seat.bet}
             div(class="player-hand")
             div(class="player-actions") 
-                a(href="#" class="state")
+                span(class="state" action="#")
 
 mixin chat
     div(class="table-chat")
@@ -66,17 +67,9 @@ block content
 
     ul(class="table-actions")
         li
-            a(href="start/" class="start") Start game
-        li
-            a(href="flop/" class="flop") flop
-        li
-            a(href="turn/" class="turn") turn
-        li
-            a(href="river/" class="river") river    
-        li
-            a(href="winner/" class="winner") winner
+            span(action="start" class="start") Start game
     
-    div(class="table")
+    div(class="table" ident="#{table._id}")
         div(class="wrapper")
             div(class="table-backdrop")
             div(class="table-seats")
@@ -86,16 +79,18 @@ block content
                             div(class="column all-fifth")
                                 if (seat.player !== null)
                                     if(seat.dealer)
-                                        div(class="seat seated dealer")
+                                        div(class="seat seated dealer" index="#{seat.index}")
                                             div(class="vertical-center")
                                                 +seat(seat)
                                     else
-                                        div(class="seat seated")
+                                        div(class="seat seated" index="#{seat.index}")
                                             div(class="vertical-center")
                                                 +seat(seat)
                                 else
-                                    div(class="seat")
+                                    div(class="seat" index="#{seat.index}")
                                         div(class="vertical-center")
                                             +seat(seat)
-            div(class="table-cards")
+            div(class="table-center")
+                div(class="table-pot")
+                div(class="table-cards") 
     +table-footer

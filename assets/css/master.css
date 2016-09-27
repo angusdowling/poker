@@ -1718,6 +1718,9 @@ table th {
   background-size: cover;
   background-repeat: no-repeat;
 }
+.table-actions span {
+  cursor: pointer;
+}
 .table .wrapper {
   position: relative;
 }
@@ -1728,10 +1731,19 @@ table th {
   background-size: contain;
   background-repeat: no-repeat;
 }
-.table-cards {
+.table-center {
   position: absolute;
   left: calc(50% - 250px);
   top: calc(50% - 75px);
+  width: 530px;
+}
+.table-pot {
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  top: -30px;
+  left: 0;
+  font-size: 21px;
 }
 .table-cards .card {
   max-width: 100px;
@@ -1798,7 +1810,7 @@ table th {
   border-radius: 50%;
   border: 1px solid #39e2ec;
   bottom: calc(100% + 85px);
-  left: 50%;
+  left: calc(50% + 30px);
   font-size: 14px;
   background-color: rgba(255, 255, 255, 0.4);
 }
@@ -1811,6 +1823,14 @@ table th {
 }
 .table-seats .seat .player-header p.chips {
   font-size: 16px;
+}
+.table-seats .seat .player-header p.bet {
+  position: absolute;
+  top: -115px;
+  left: 0;
+  width: 100%;
+  display: block;
+  font-size: 24px;
 }
 .table-seats .seat .player-actions .state {
   font-size: 16px;
@@ -1826,6 +1846,9 @@ table th {
   width: calc(50% - 30px);
   margin: 0 2px;
   box-shadow: 3px 2px 7px 0px rgba(0, 0, 0, 0.09);
+}
+.table-seats .seat .state {
+  cursor: pointer;
 }
 .table-footer {
   position: relative;

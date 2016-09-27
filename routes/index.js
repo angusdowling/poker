@@ -5,6 +5,7 @@ var lobby = require('./lobby');
 var table = require('./table');
 var admin = require('./admin');
 
+
 /* Define variables */
 var router;
 
@@ -17,5 +18,6 @@ function routes(app) {
     app.use('/table', table);
     app.use('/admin', admin);
 }
+
 
 module.exports = routes;

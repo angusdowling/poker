@@ -9,10 +9,11 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var mongodb = require('mongodb');
-
 var routes = require('./routes/index');
 
 var app = express();
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,11 +25,14 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(require('express-session')({
+
+app.session = require('express-session')({
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: false
-}));
+});
+
+app.use(app.session);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'assets')));

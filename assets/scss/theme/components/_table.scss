@@ -4,6 +4,12 @@
     background-size: cover;
     background-repeat: no-repeat;
 
+    &-actions {
+        span {
+            cursor: pointer;
+        }
+    }
+
     .wrapper {
         position: relative;
     }
@@ -16,11 +22,23 @@
         background-repeat: no-repeat;
     }
 
-    &-cards {
+    &-center {
         position: absolute;
         left: calc(50% - 250px);
         top: calc(50% - 75px);
+        width: 530px;
+    }
 
+    &-pot {
+        position: absolute;
+        text-align: center;
+        width: 100%;
+        top: -30px;
+        left: 0;
+        font-size: 21px;
+    }
+
+    &-cards {
         .card {
             max-width: 100px;
             margin-right: 5px;
@@ -113,7 +131,7 @@
                     border-radius: 50%;
                     border: 1px solid $color-brand-1;
                     bottom: calc(100% + 85px);
-                    left: 50%;
+                    left: calc(50% + 30px);
                     font-size: 14px;
                     background-color: rgba(255, 255, 255, 0.4);
                 }
@@ -129,6 +147,15 @@
 
                         &.chips {
                             font-size: 16px;
+                        }
+
+                        &.bet {
+                            position: absolute;
+                            top: -115px;
+                            left: 0;
+                            width: 100%;
+                            display: block;
+                            font-size: 24px;                   
                         }
                     }
                 }
@@ -152,6 +179,10 @@
                         box-shadow: 3px 2px 7px 0px rgba(0, 0, 0, 0.09);
                     }
                 }
+            }
+
+            .state {
+                cursor: pointer; 
             }
         }
     }

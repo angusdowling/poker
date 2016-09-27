@@ -41,7 +41,6 @@ exports.newTable = function(req, res) {
             active: false,
             dealer: false,
             chips: 0,
-            actions: ["call", "fold", "allin", "check", "bet", "join", "exit"],
             hand: [],
             index: i,
             bet: 0

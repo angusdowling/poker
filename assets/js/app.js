@@ -12,145 +12,81 @@
  * 
  */
 
+var socket = io();
+
 var app = app || {};
 
 app.config = {
-    table: null,
-    player: null,
-    user: null,
+    table: {},
+    player: {},
+    user: {},
     buttons: {
         seat: {
             post: '.seat .state',
-            bet: '.bet',
+            bet: '#bet-form',
             fold: '.fold',
             check: '.check'
         },
 
         table: {
-            post: '.table-actions a'
+            post: '.table-actions span'
         }
     }
 }
 
 app.init = function() {
-    app.table.getData(null, "refresh/");
+    app.table.refresh();
     app.listeners();
 };
 
 app.listeners = function() {
-    $(app.config.buttons.seat.post).on('click', function(e) {
-        app.seat.getData($(this));
-        e.preventDefault();
+    var button = app.config.buttons;
+
+    $(button.table.post).on('click', function(e){
+        var action = $(this).attr('action');
+        app.table.update(action);
     });
 
-    $(app.config.buttons.table.post).on('click', function(e) {
-        app.table.getData($(this));
-        e.preventDefault();
-    });
+    $(button.seat.post).on('click', function(e){
+        var url    = $(this).attr('action').split("/")
+        var action = url[0];
+        var config = {};
+            config.seatid = url[1];
 
-    $(app.config.buttons.seat.check).on('click', function(e) {
-        if(app.config.player !== null){
-            app.table.getData(false, "check/" + app.config.player.seatid);
-        }
+        app.table.update(action, config);
 
         return false;
     });
 
-    $(app.config.buttons.seat.fold).on('click', function(e) {
-        if(app.config.player !== null){
-            app.table.getData(false, "fold/" + app.config.player.seatid);
-        }
+    $(button.seat.check).on('click', function(e) {
+        app.table.update('check');
+
+        return false;
+    });
+
+    $(button.seat.fold).on('click', function(e) {
+        app.table.update('fold');
         
         return false;
     });
 
-    $('#bet-form').on('submit', function(e){
-        var bet = parseInt($('#amount').val(), 10);
+    $(button.seat.bet).on('submit', function(e){
+        var config = {};
+            config.bet = parseInt($('#amount').val(), 10);
 
-        if(app.config.player !== null){
-            app.table.getData(false, "bet/" + app.config.player.seatid + "/" + bet);
-        }
+        app.table.update('bet', config);
 
         return false;
+    });
+
+    socket.on('table refresh', function(req){
+        app.table.callback(req);
+    });
+
+    socket.on('player refresh', function(req){
+        app.player.callback(req); 
     });
 };
-
-/**
- * Seat methods
- * 
- * @namespace seat
- * 
- * @param getData
- *      Ajax post to fetch data related to the seat. (handles sitting down, leaving seat)
- * @param action
- *      ONLOAD: Show the appropriate seating action (leave / join)
- * @param toggleState
- *      On AJAX request: toggle state of seat (if user is seated or not, show relevant data)
- */
-
-app.seat = {
-    getData: function(obj) {
-        var url = obj.attr('href');
-        var seat = obj.closest('.seat');
-
-        $.ajax({
-            method: "POST",
-            url: url,
-            datatype: "json",
-        }).success(function(data) {
-            // Redirect if a redirect is assigned
-            if (typeof data.redirect === "string") {
-                return window.location.replace(window.location.protocol + "//" + window.location.host + data.redirect);
-            }
-
-            // Rework how this gets toggled
-            if (data.success) {
-                seat.toggleClass('seated');
-            }
-        });
-    },
-
-    action: function() {
-        var table = app.config.table;
-        
-        for(var i = 0; i < table.seats.length; i++){
-            if(app.config.user == null){
-                return;
-            }
-
-            if(typeof app.config.player.seatid !== "undefined"){
-                return;
-            }
-
-            var seat = table.seats[i];
-            var leave = "leave/" + i;
-            var join = "join/" + i;
-            var state = $('.seat .player-actions .state').eq(i);
-
-            if(seat.player == null){
-                state.attr('href', join);
-                state.html('Join');
-            }
-        }
-    },
-
-    setActive: function(){
-        var seatList = app.config.table.seats;
-        var seats = $('.seat');
-        for(var i = 0; i < seatList.length; i++){
-            var seat = seatList[i];
-            
-            if(seat.active){
-                seats.eq(i).addClass('active');
-            }
-        }
-    },
-
-    toggleState: function() {
-        
-    }
-};
-
 
 /**
  * Player methods
@@ -163,6 +99,16 @@ app.seat = {
  */
 
 app.player = {
+    callback: function(req){
+        app.config.player = (typeof req.player !== "undefined") ? req.player : {};
+
+        console.log(req);
+
+        if ("hand" in app.config.player && "seatid" in app.config.player) {
+            app.player.showHand(app.config.player.hand, app.config.player.seatid);
+        }
+    },
+
     showHand: function(hand, seatid) {
         var cards = "";
 
@@ -184,17 +130,123 @@ app.player = {
  *      Turns the cards fetched from a JSON object into printable string to be inserted into the page
  * @param callback
  *      Function called after successful AJAX request
- * @param getData
+ * @param update
  *      Fetch current table state when the page gets loaded (player hands, table cards, whos seated etc)
  * 
  */
 
 app.table = {
-    getCards: function(table) {
-        var cards = [table.flop, table.turn, table.river];
+    callback: function(req){
+        app.config.table  = (typeof req.table !== "undefined") ? req.table : {};
 
-        for (var i = 0; i < cards.length; i++) {
-            var card = cards[i];
+        app.game.setCards();
+        app.game.seats();
+        app.game.setPot();
+    },
+
+    refresh: function() {
+        $.ajax({
+            method: "POST",
+            url: 'refresh/',
+            datatype: "json"
+        })
+
+        .success(function(data) {
+            app.player.callback(data);
+            app.table.callback(data);
+        })
+        
+        .error(function(err){
+            console.log(err);
+        });
+    },
+
+    update: function(action, config){
+        var ident   = $('.table').attr('ident');
+        var request = {};
+        request.id  = ident;
+
+        if(typeof action !== "undefined"){
+            request.action = action;
+        }
+
+        if(typeof config !== "undefined"){
+            if(typeof config.bet !== "undefined"){
+                request.chips  = config.bet;
+            }
+
+            if(typeof config.seatid !== "undefined"){
+                request.seatid  = config.seatid;
+            }
+        }
+
+        socket.emit('seat action', request);
+    }
+};
+
+app.game = {
+    setDealer: function(){
+        // @TODO: Set the dealer button
+    },
+
+    seats: function(){
+        var table = app.config.table;
+
+        for(var i = 0; i < table.seats.length; i++){
+            var seat = table.seats[i];
+            var actual = $('.seat[index="'+i+'"]');
+
+            app.game.setPlayers(seat, actual);
+            app.game.sitToggle(seat, actual, i);
+            app.game.setChips(seat, actual);
+            app.game.setBet(seat, actual);
+            app.game.setActive(seat, actual);  
+        }
+    },
+
+    setChips: function(seat, actual){
+        var chipHolder = actual.find('.chips');
+        
+        if(seat.chips > 0){
+            if(seat.player !== null){
+                return chipHolder.html(seat.chips);
+            }
+        }
+
+        return chipHolder.html(' ');
+    },
+
+    setPlayers: function(seat, actual){
+        var username = actual.find('.username');
+
+        if(seat.player === null){
+            return username.html(" ");
+        }
+
+        return username.html(seat.player);
+    },
+
+    setBet: function(seat, actual){
+        var betHolder = actual.find('.bet');
+        
+        if(seat.bet > 0){
+            if(seat.player !== null){
+                return betHolder.html(seat.bet);
+            }
+        }
+
+        return betHolder.html(' ');
+    },
+
+    setCards: function() {
+        var tableBoard   =  $('.table .table-cards');
+        var cardsOnTable = tableBoard.find('.card').length;
+        var table        = app.config.table;
+        var cardsToShow  = [table.flop, table.turn, table.river];
+        var cardList     = "";
+
+        for (var i = 0; i < cardsToShow.length; i++) {
+            var card = cardsToShow[i];
 
             if (typeof card !== "undefined") {
                 if (card.length > 0) {
@@ -204,60 +256,70 @@ app.table = {
                         str += "<img class='card' src='/images/table/cards/"+ card[j].suit + card[j].value + ".png' alt="+ card[j].suit + card[j].value + ">";
                     }
 
-                    $('.table .table-cards').append(str);
+                   cardList += str;
                 }
             }
         }
+
+        tableBoard.html(cardList);
     },
 
-    callback: function(data){
-        // Redirect if a redirect is assigned
-        // if (typeof data.redirect === "string") {
-        //     return window.location.replace(window.location.protocol + "//" + window.location.host + data.redirect);
-        // }
+    setPot: function(){
+        var pot = $('.table-pot');
 
-        // Do stuff for player
-        if (typeof data.player !== "undefined") {
-            app.config.player = data.player;
+        if(app.config.table.pot > 0){
+            pot.html("POT: <strong>"+app.config.table.pot+"</strong>");
+        }
+    },
 
-            if (typeof data.player.hand !== "undefined") {
-                app.player.showHand(data.player.hand, data.player.seatid);
+    setCardBacks: function(){
+        // @OTOD: set card backs for other players
+    },
+
+    resetTable: function(){
+        // Reset table state
+    },
+
+    setActive: function(seat, actual){
+        var seats = $('.seat');
+
+        if(seat.active){
+            seats.removeClass('active');
+            actual.addClass('active');
+        }
+    },
+
+    sitToggle: function(seat, actual, index) {
+        var leave = "leave/" + index;
+        var join  = "join/" + index;
+        var state = actual.find('.state'); 
+        var chips = actual.find('.chips');
+
+        if(app.config.player.username == null){
+            return;
+        }
+
+        if(app.config.player !== null){
+            if(typeof app.config.player.seatid !== "undefined"){
+                if(seat.player === app.config.player.username){
+                    state.attr('action', leave);
+                    state.html('Leave');
+                }
+
+                else {
+                    state.html("");
+                }
+
+                return;
             }
+        } 
+
+        if(seat.player == null){
+            state.attr('action', join);
+            state.html('Join');
         }
-
-        if(typeof data.user !== "undefined"){
-            app.config.user = data.user;
-        }
-
-        // Do stuff for table
-        if (typeof data.table !== "undefined") {
-            app.config.table = data.table;
-            app.table.getCards(data.table);
-            app.seat.action();
-            app.seat.setActive();
-        }
-
-        console.log(data);
-    },
-
-    getData: function(obj, url) {
-        if (obj) {
-            var url = obj.attr('href');
-        }
-
-        console.log(url);
-
-        $.ajax({
-            method: "POST",
-            url: url,
-            datatype: "json",
-        }).success(function(data) {        
-            app.table.callback(data);
-        }).error(function(err){
-            console.log(err);
-        })
     }
-};
+}
 
 
 $(document).ready(function() {
