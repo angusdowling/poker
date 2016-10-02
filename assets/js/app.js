@@ -29,7 +29,7 @@ app.config = {
         },
 
         table: {
-            post: '.table-actions span'
+            post: '.table-actions .start'
         }
     }
 }
@@ -100,12 +100,27 @@ app.listeners = function() {
 
 app.player = {
     callback: function(req){
-        app.config.player = (typeof req.player !== "undefined") ? req.player : {};
 
-        console.log(req);
+        if(typeof req.player === "object"){
+            app.config.player = req.player;
+        }
 
-        if ("hand" in app.config.player && "seatid" in app.config.player) {
-            app.player.showHand(app.config.player.hand, app.config.player.seatid);
+        else if(typeof req.player === "string") {
+            app.config.player = req;
+        }
+
+        else if(typeof req.seats !== "undefined") {
+            app.config.player = req.seats;
+        }
+
+        else if(typeof req.username === "string"){
+            app.config.player = req.username;
+        }
+        
+        if(typeof app.config.player === "object"){
+            if ("hand" in app.config.player && "seatid" in app.config.player) {
+                app.player.showHand(app.config.player.hand, app.config.player.seatid);
+            }
         }
     },
 
@@ -119,7 +134,7 @@ app.player = {
 
         $('.seat').eq(seatid).find('.player-hand').html(cards);
     }
-}
+};
 
 /**
  * Table methods
@@ -138,10 +153,12 @@ app.player = {
 app.table = {
     callback: function(req){
         app.config.table  = (typeof req.table !== "undefined") ? req.table : {};
+        app.config.log    = (typeof req.log !== "undefined") ? req.log : "";
 
         app.game.setCards();
         app.game.seats();
         app.game.setPot();
+        app.log.print();
     },
 
     refresh: function() {
@@ -157,7 +174,7 @@ app.table = {
         })
         
         .error(function(err){
-            console.log(err);
+            // console.log(err);
         });
     },
 
@@ -180,13 +197,19 @@ app.table = {
             }
         }
 
+        
+
         socket.emit('seat action', request);
     }
 };
 
 app.game = {
-    setDealer: function(){
-        // @TODO: Set the dealer button
+    setDealer: function(seat, actual){
+        var seats = $('.seat');
+        if(seat.dealer){
+            seats.removeClass('dealer');
+            actual.addClass('dealer');
+        }
     },
 
     seats: function(){
@@ -200,7 +223,8 @@ app.game = {
             app.game.sitToggle(seat, actual, i);
             app.game.setChips(seat, actual);
             app.game.setBet(seat, actual);
-            app.game.setActive(seat, actual);  
+            app.game.setActive(seat, actual);
+            app.game.setDealer(seat, actual);
         }
     },
 
@@ -247,18 +271,20 @@ app.game = {
 
         for (var i = 0; i < cardsToShow.length; i++) {
             var card = cardsToShow[i];
+            var str = "";
 
-            if (typeof card !== "undefined") {
-                if (card.length > 0) {
-                    var str = "";
-
-                    for (var j = 0; j < card.length; j++) {
-                        str += "<img class='card' src='/images/table/cards/"+ card[j].suit + card[j].value + ".png' alt="+ card[j].suit + card[j].value + ">";
-                    }
-
-                   cardList += str;
-                }
+            if (
+                typeof card === "undefined" ||
+                card.length < 0
+            ) {
+                continue;
             }
+
+            for (var j = 0; j < card.length; j++) {
+                str += "<img class='card' src='/images/table/cards/"+ card[j].suit + card[j].value + ".png' alt="+ card[j].suit + card[j].value + ">";
+            }
+
+            cardList += str;            
         }
 
         tableBoard.html(cardList);
@@ -269,6 +295,10 @@ app.game = {
 
         if(app.config.table.pot > 0){
             pot.html("POT: <strong>"+app.config.table.pot+"</strong>");
+        }
+
+        else {
+            pot.html(" ");
         }
     },
 
@@ -295,28 +325,35 @@ app.game = {
         var state = actual.find('.state'); 
         var chips = actual.find('.chips');
 
-        if(app.config.player.username == null){
+        // If user isn't logged in, don't show seats
+        if(app.config.player == null){
             return;
         }
 
-        if(app.config.player !== null){
-            if(typeof app.config.player.seatid !== "undefined"){
-                if(seat.player === app.config.player.username){
-                    state.attr('action', leave);
-                    state.html('Leave');
-                }
-
-                else {
-                    state.html("");
-                }
-
-                return;
+        if(typeof app.config.player.seatid === "undefined"){
+            if(seat.player == null){
+                state.attr('action', join);
+                state.html('Join');
             }
-        } 
+        }
 
-        if(seat.player == null){
-            state.attr('action', join);
-            state.html('Join');
+        else {
+            if(seat.player === app.config.player.username){
+                state.attr('action', leave);
+                state.html('Leave');
+            } else {
+                state.html("");
+            }
+        }  
+    }
+};
+
+app.log = {
+    print: function(){
+        var content = $('.table-history .table-history--content');
+
+        if(app.config.log !== ""){
+            content.append('<p>' + app.config.log + '</p>');
         }
     }
 }

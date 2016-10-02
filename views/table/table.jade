@@ -19,6 +19,14 @@ mixin chat
 
 mixin history
     div(class="table-history")
+        div(class="table-history--header")
+            p Hand #12501736-1 - 2016-09-15 02:38:36
+        div(class="table-history--content")
+            p SOULJACKER87 has the dealer button
+            p YAMASHALLA posts the small blind (50)
+            p TAKO888888 posts the big blind (100)
+            p SHHMOKE raises to 400
+            p BIGVARAS folds
 
 mixin actions
     div(class="table-actions")
@@ -35,7 +43,7 @@ mixin actions
 mixin table-footer
     div(class="table-footer")
         div(class="wrapper")
-            div(class="grid")
+            div(class="grid collapsed")
                 div(class="row")
                     div(class="column all-4")
                         +chat

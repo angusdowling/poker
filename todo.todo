@@ -1,14 +1,12 @@
 UP NEXT:
-    1. MIN BETS
-    2. ACTIVE SEAT ON EACH ROUND WORKS PROPERLY
-    3. FOLDING
-    4. SHOW CARDS ON SHOWDOWN
-    4. ROUND DETAIL WINDOW
-    5. CHAT WINDOW
+    3. ROUND DETAIL WINDOW
+    4. CHAT WINDOW
+    5. ON PLAYER LEAVE, APPEND SEAT CHIPS TO THEIR ACCOUNT
 
 Need to have:
     - Show cards / automuck checkbox
     - Sitout next hand
+    - Buyin amount (above certain limit)
 
 in real time:
     -   When a player leaves, their seat is turned inactive and their hand cards are removed.
@@ -16,8 +14,9 @@ in real time:
     -   When a plyer joins, that seat is "sitting out" until the next hand.
     -   Active seat doesn't go to first player after dealer after each round.
 
-    -   Chips in bet pool
-
-
     LIVE ACTION:
         - Dealer button
+
+
+Slow down play to show:
+    1. CARDS ON SHOWDOWN

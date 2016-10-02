@@ -1,15 +1,17 @@
 /* Import node_modules */
-var express = require('express');
+var express  = require('express');
 var passport = require('passport');
 var mongoose = require('mongoose');
 
 /* Load models */
 var Account = require('../models/account');
-var Table = require('../models/table');
-var Seat = require('../models/seat');
-var Deck = require('../models/deck');
-var Card = require('../models/card');
-var Solver = require('../assets/js/vendor/pokersolver.js');
+var Table   = require('../models/table');
+var Seat    = require('../models/seat');
+var Hand    = require('../models/hand');
+var Log     = require('../models/log');
+var Deck    = require('../models/deck');
+var Card    = require('../models/card');
+var Solver  = require('../assets/js/vendor/pokersolver.js');
 
 var app = app || {};
 
@@ -25,7 +27,7 @@ var app = app || {};
 
 app.config = {
     validBuyin: false,
-    response  : { response: "An unknown error has occurred", success: false },
+    response  : {},
     action    : "undefined",
     id        : "undefined",
     chips     : "undefined",
@@ -96,12 +98,12 @@ app.helper = {
 app.state = {
     isError: function(err, table) {
         if (err) {
-            app.config.response.response = err;
+            console.log(err);
             return true;
         }
 
         if (!table) {
-            app.config.response.response = "Table not found";
+            console.log("Table not found");
 
             return true;
         }
@@ -263,35 +265,43 @@ app.table = {
         table.save();
     },
 
+    getBuyin: function(table){
+        var filledSeats = app.helper.filledSeats(table);
+
+        for (var i = 0; i < filledSeats.length; i++) {
+            var seat = table.seats[filledSeats[i]];
+
+            app.user.getBuyin(table, seat);
+
+            if (seat.chips !== table.buyin) {
+                seat.chips = table.buyin;
+            }
+
+            seat.bet = 0;
+        }
+
+        table.markModified('seats');
+        table.save();
+    },
+
     start: function(table) {
         var filledSeats = app.helper.filledSeats(table);
 
-        if (filledSeats.length > 0) {
-            table.status = "Started";
-
-            // Get buyin
-            for (var i = 0; i < filledSeats.length; i++) {
-                var seat = table.seats[filledSeats[i]];
-
-                app.user.getBuyin(table, seat);
-
-                if (seat.chips !== table.buyin) {
-                    seat.chips = table.buyin;
-                }
-
-                seat.bet = 0;
-            }
-
-            table.markModified('seats');
-            table.save();
-
-            app.game.setDealer(table);
-            app.game.startRound(table);
+        if (filledSeats.length < 0) {
+            console.log("No seats filled");
         }
 
-        else {
-            app.config.response.response ="No seats filled";
-        }
+        table.status = "Started";
+
+        table.markModified('seats');
+        table.save();
+        
+        app.table.getBuyin(table);
+        app.game.resetDeck(table);
+        app.game.resetPlayers(table);
+        app.game.resetTable(table);
+        app.game.setDealer(table);
+        app.game.startRound(table);
     }
 };
 
@@ -303,7 +313,7 @@ app.table = {
  * @param resetDeck
  *      Get a new deck (regenerate all 52 cards)
  * 
- *  @param resetHand
+ *  @param resetPlayers
  *      PER HAND: Reset player hand cards.
  * 
  *  @param resetTable
@@ -366,18 +376,24 @@ app.game = {
         table.save();
     },
 
-    resetHand: function(table) {
+    resetPlayers: function(table) {
         var filledSeats = app.helper.filledSeats(table);
-        // TODO: rename.. turning more into a "resetPlayer".
 
-        for (var i = 0; i < filledSeats.length; i++) {
-            var seat = table.seats[filledSeats[i]];
+        for (var i = 0; i < table.seats.length; i++) {
+            var seat = table.seats[i];
             seat.active = false;
             seat.hand   = [];
             seat.solved = [];
             seat.bet    = 0;
             seat.last   = null;
-            seat.inhand = true;
+            seat.inhand = false;
+            seat.allin  = false;
+        }
+
+        for(var j = 0; j < filledSeats.length; j++){
+            var seat = table.seats[filledSeats[j]];
+            app.game.kick(table, seat);
+            seat.inhand = true;     
         }
 
         table.markModified('seats');
@@ -389,6 +405,7 @@ app.game = {
         table.turn = [];
         table.river = [];
         table.round = 0;
+        table.hand = new Hand();
         table.save();
     },
 
@@ -434,33 +451,42 @@ app.game = {
 
     setBlinds: function(table) {
         for (var i = 0; i < table.seats.length; i++) {
-            var seat = table.seats[i];
-            var nextSeat = app.seat.nextSeat(table, seat);
+            var seat     = table.seats[i];
+            var nextSeat;
+            var config;
 
-            if (typeof seat.player === "string") {
-                var config;
+            if(typeof seat === "undefined"){
+                continue;
+            }
 
-                if (seat.position === 1) {
+            if (typeof seat.player !== "string") {
+                continue;
+            }
+
+            nextSeat = app.seat.nextSeat(table, seat);
+
+            switch(seat.position){
+                case 1:
                     config = {
                         chips: table.sblind,
                         pot: false,
                         blind: true
                     }
-                }
 
-                if (seat.position === 2) {     
-                    config = {
+                    app.seat.bet(table, seat, config);
+
+                    break;
+                case 2:
+                     config = {
                         chips: table.bblind,
                         pot: false,
                         blind: true
                     }
-              
-                    app.game.setActiveSeat(table, nextSeat);
-                }
 
-                if(seat.position === 1 | seat.position === 2){
+                    app.game.setActiveSeat(table, nextSeat);
                     app.seat.bet(table, seat, config);
-                }
+
+                    break;
             }
         }
     },
@@ -485,13 +511,32 @@ app.game = {
         table.save();
     },
 
+    playersWhoCanAct: function(table){
+        var amount = 0;
+
+        for(var i = 0; i < table.seats.length; i++){
+            var seat = table.seats[i];
+
+            if(seat.inhand){
+                if(!seat.allin){
+                    amount = amount + 1;
+                }
+            }
+        }
+
+        return amount;
+    },
+
     setRound: function(table){
-        var action = [
-            null,
-            "flop",
-            "turn",
-            "river"
-        ]
+        var dealer           = app.game.getDealer(table);
+        var firstActive      = app.seat.nextSeat(table, dealer);
+        var playersWhoCanAct = app.game.playersWhoCanAct(table);
+        var action           = [
+                                null,
+                                "flop",
+                                "turn",
+                                "river"
+                            ]
 
         if(table.round < 3){
             table.round = table.round + 1;
@@ -510,6 +555,12 @@ app.game = {
                     app.game.river(table);
                     break;
             }
+
+            if(playersWhoCanAct >= 2){
+                return app.game.setActiveSeat(table, firstActive);
+            }
+
+            return app.game.setRound(table);
         }
 
         else {
@@ -523,30 +574,29 @@ app.game = {
     },
 
     endRound: function(table, seat){
-        var highestBet = app.seat.highestBet(table);
         var playersInHand = app.seat.playersInHand(table);
-        var dealer = app.game.getDealer(table);
-        var firstActive = app.seat.nextSeat(table, dealer);
+        var winner        = app.seat.nextSeat(table, seat);
         
         app.seat.betsToPot(table);
         
         // Check if there's at least 2 players still in the hand
         if(playersInHand.length > 1){
             app.game.setRound(table);
-            app.game.setActiveSeat(table, firstActive);
+            console.log('set round');
         }
 
         else {
-            // Give pot to last player in hand
+            app.seat.takePot(table, winner.index);
+            app.game.startRound(table);
+            return;
         }
 
         app.game.resetLast(table);
-        
     },
 
     startRound: function(table){ 
         app.game.resetDeck(table);
-        app.game.resetHand(table);
+        app.game.resetPlayers(table);
         app.game.resetTable(table);
         app.game.moveDealer(table);
         app.seat.setPosition(table);
@@ -641,8 +691,12 @@ app.game = {
         app.seat.solveHand(table);
     },
 
-    kick: function() {
-        // @TODO: kick player
+    kick: function(table, seat) {
+        if(seat.chips === 0){
+            seat.player = null;
+            table.markModified('seats');
+            table.save();
+        }
     },
 
     winner: function(table){
@@ -654,11 +708,13 @@ app.game = {
         for(var i = 0; i < playersInHand.length; i++){
             var seat = table.seats[playersInHand[i]];
             hands.push(Solver.Hand.solve(seat.solved));
-        }     
-
-        if(hands.length > 0){
-            winningHand = Solver.Hand.winners(hands);
         }
+
+        if(hands.length === 0){
+            return console.log("No hands to compare");
+        }
+
+        winningHand = Solver.Hand.winners(hands);
 
         for(var i = 0; i < playersInHand.length; i++){
             var seat = table.seats[playersInHand[i]];
@@ -674,33 +730,60 @@ app.game = {
         return winningPlayer;
     },
 
+    sendSeatData: function(table) {
+        var seats = {};
+         var playerData = { username: app.config.user };
+            var seatid     = app.game.playerData.getSeatId(table);
+
+        for (var i = 0; i < table.seats.length; i++) {
+            var seat = table.seats[i];
+
+            if(seat.player == null){
+                continue;
+            }
+
+            seats[seat.player] = {
+                seatid     : seat.index,
+                active     : seat.active,
+                player     : seat.player,
+                hand       : seat.hand,
+                inhand     : seat.inhand,
+                solved     : seat.solved,
+                username   : seat.player
+            };
+        }
+
+        return seats;
+    },
+
     sendTableData: function(table) {
         var seats = [];
 
         for (var i = 0; i < table.seats.length; i++) {
             var seat = {
-                player: table.seats[i].player,
-                dealer: table.seats[i].dealer,
-                chips: table.seats[i].chips,
-                position: table.seats[i].position,
-                active: table.seats[i].active,
-                bet: table.seats[i].bet
+                player   : table.seats[i].player,
+                dealer   : table.seats[i].dealer,
+                chips    : table.seats[i].chips,
+                position : table.seats[i].position,
+                active   : table.seats[i].active,
+                bet      : table.seats[i].bet
             }
 
             seats.push(seat);
         }
 
         return {
-            id: table._id,
-            seats: seats,
-            flop: table.flop,
-            turn: table.turn,
-            river: table.river,
-            status: table.status,
-            pot: table.pot,
-            sblind: table.sblind,
-            bblind: table.bblind,
-            buyin: table.buyin
+            id     : table._id,
+            seats  : seats,
+            flop   : table.flop,
+            turn   : table.turn,
+            river  : table.river,
+            status : table.status,
+            pot    : table.pot,
+            sblind : table.sblind,
+            bblind : table.bblind,
+            buyin  : table.buyin,
+            hand   : table.hand
         };
     },
 
@@ -751,7 +834,7 @@ app.game = {
  * 
  * @param call
  *      Match the current bet
- * 
+ *  
  *  @param fold
  *      Fold hand
  * 
@@ -780,59 +863,88 @@ app.seat = {
     },
 
     nextAction: function(table, seat) {
-        var highestBet = app.seat.highestBet(table);
-        var nextSeat = app.seat.nextSeat(table, seat);
+        var highestBet       = app.seat.highestBet(table);
+        var nextSeat         = app.seat.nextSeat(table, seat);
+        var playersWhoCanAct = app.game.playersWhoCanAct(table);
+
+        seat.active = false;
+
+        if(typeof nextSeat === "undefined"){
+            return app.game.endRound(table, nextSeat);
+        }
 
         if(nextSeat.last !== null){
             if(highestBet === nextSeat.bet){
-                app.game.endRound(table, nextSeat);
+                return app.game.endRound(table, nextSeat);
             }
         }
 
-        else {
-            seat.active = false;
-            app.game.setActiveSeat(table, nextSeat);
+        if(seat.player === nextSeat.player){
+            return app.game.endRound(table, nextSeat);
         }
+
+        if(playersWhoCanAct < 2){
+            return app.game.endRound(table, nextSeat); 
+        }
+        
+        app.game.setActiveSeat(table, nextSeat);
 
         table.markModified('seats');
         table.save();
     },
 
     bet: function(table, seat, config) {
+        var highestBet = app.seat.highestBet(table);
         var chips = config.chips;
         var blind = config.blind;
         var pot   = config.pot;
 
-        if(!seat.active && !blind){
-            app.config.response.response = "User is not active";
-            return;
-        }
-
-        if (seat.chips > chips) {
-            seat.chips = seat.chips - chips;
-            
-            if(pot){
-                table.pot = table.pot + chips;      
-            }
-
-            else {
-                seat.bet = parseInt(seat.bet, 10) + parseInt(chips, 10);
-            }
-
-            app.config.response.response = "User has bet " + chips;
-
-        } else {
-            app.config.response.response = "Seat does not have enough chips available for this transaction";
-            // @TODO: Kick player from table or something?
-        }
-
         if(!blind){
-            app.seat.nextAction(table, seat);
+            if(!seat.active){
+                return console.log("User is not active");
+            }
+            
+            if(table.bblind > chips + seat.bet) {
+                return console.log("You need to at least the size of the big blind");
+            }
+
+            if(highestBet > chips + seat.bet){
+                return console.log("Your bet needs to be at least " + highestBet);
+            }
+        }
+
+        if (chips > seat.chips) {
+            return console.log("Seat does not have enough chips available for this transaction");
+        }
+
+        if(chips === seat.chips) {
+            seat.allin = true;
+            var message = seat.player + " is all in";
+            app.log.create(message, seat.player, table);
+        }
+
+
+        seat.chips = seat.chips - chips;
+
+        if(pot){
+            table.pot = table.pot + chips;      
+        } else {
+            seat.bet = parseInt(seat.bet, 10) + parseInt(chips, 10);
+        }
+
+        if(chips !== seat.chips){
+            var message = seat.player + " raised the bet to " + seat.bet;
+            app.log.create(message, seat.player, table);
         }
 
         table.markModified('seats');
         table.markModified('pot');
         table.save();
+
+        // Next action
+        if(!blind){
+            app.seat.nextAction(table, seat);
+        }      
     },
 
     takePot: function(table, seatid) {
@@ -920,44 +1032,48 @@ app.seat = {
     },
 
     playerAction: function(table){
-        var seat = table.seats[app.config.seatid];
-        var highestBet = app.seat.highestBet(table);
-        var allowedActions = ["fold"];
+        var seat            = table.seats[app.config.seatid];
+        var highestBet      = app.seat.highestBet(table);
+        var allowedActions  = ["fold"];
+        var action          = app.config.action;
 
-        if(highestBet === seat.bet) {
-            allowedActions = ["bet", "fold", "check"];
+        switch(true){
+            case (highestBet === seat.bet):
+                allowedActions = ["bet", "fold", "check"];
+                break;
+
+            case (highestBet > seat.bet):
+                allowedActions = ["bet", "fold"];
+                break;
         }
 
-        else if(highestBet > seat.bet){
-            allowedActions = ["bet", "fold"];
+        if(allowedActions.indexOf(action) === -1){
+            return console.log("Unable to perform action");
         }
+        
+        seat.last = action;
 
-        if(allowedActions.indexOf(app.config.action) !== -1){
-            seat.last = app.config.action;
-
-            if(app.config.action === "bet"){
+        switch(action){
+            case "bet":
                 config = { chips: app.config.chips, pot: false, blind: false };
                 app.seat.bet(table, seat, config);
-            }
-
-            if(app.config.action === "fold"){
+                break;
+            
+            case "fold":
                 seat.inhand = false;
-            }
-
-            if(app.config.action === "check" || app.config.action === "fold"){
-                seat.active = false;
-                var nextSeat = app.seat.nextSeat(table, seat);
-                app.game.setActiveSeat(table, nextSeat);
                 app.seat.nextAction(table, seat);
-            }
-
-            table.markModified('seats');
-            table.save();
+                var message = seat.player + " folded";
+                app.log.create(message, seat.player, table);
+                break;
+            
+            case "check":
+                app.seat.nextAction(table, seat);
+                var message = seat.player + " checked";
+                app.log.create(message, seat.player, table);
         }
 
-        else {
-            app.config.response.response = "Unable to perform action";
-        }
+        table.markModified('seats');
+        table.save();
     },
 
     setPosition: function(table) {
@@ -1004,19 +1120,30 @@ app.seat = {
     },
 
     nextSeat: function(table, seat){
-        var filledSeats = app.helper.filledSeats(table);
+        var filledSeats  = app.helper.filledSeats(table);
+        var index        = filledSeats.indexOf(seat.index);
+        var seatsCounted = 0;
 
-        for(var i = 0; i < filledSeats.length; i++){
-            var filledseat = filledSeats[i];
-            if(seat.index == filledseat){
-                if(typeof filledSeats[i+1] !== "undefined"){
-                    return table.seats[filledSeats[i+1]];
-                }
+        for(var i = index + 1; i <= filledSeats.length; i++){
+            var seat = filledSeats[i];
+            var nextSeat = table.seats[seat];
 
-                else {
-                    return table.seats[filledSeats[0]];
-                }
+            seatsCounted = seatsCounted + 1;
+
+            if(seatsCounted > filledSeats.length){
+                break;
             }
+
+            if(i >= filledSeats.length){
+                i = 0;
+                nextSeat = table.seats[filledSeats[i]];
+            }
+
+            if(nextSeat.player == null || !nextSeat.inhand || nextSeat.allin){
+                continue;
+            }
+
+            return nextSeat;
         }
     }
 };
@@ -1045,6 +1172,27 @@ app.card = {
         table.save();
 
         return arr;
+    }
+};
+
+app.log = {
+    create: function(content, user, table){
+        var tid = table._id;
+        var hid = table.hand._id;
+
+        var log = new Log({
+            table: tid,
+            hand: hid,
+            user: user,
+            content: content,
+            date: new Date()
+        });
+
+        log.save(function(err, newtable) {
+            if (err) {
+                return console.log(err);
+            }
+        });
     }
 };
 
@@ -1104,10 +1252,23 @@ exports.action = function(req) {
 
         app.config.response.table  = app.game.sendTableData(table);
         app.config.response.player = app.game.playerData.send(table);
+        app.config.response.seats  = app.game.sendSeatData(table);
     });
 
     return result;
 };
+
+exports.logs = function(table){
+    var logs = Log.find({ "hand": table.hand._id }, function(err, log) {
+        if (app.state.isError(err, log)) {
+            return console.log(err);
+        }
+
+        app.config.response.log = log;
+    });
+
+    return logs;
+}
 
 exports.refresh = function(req, res) {
     var id          = req.params['id'];
@@ -1120,7 +1281,7 @@ exports.refresh = function(req, res) {
 
         var refresh        = {};
             refresh.table  = app.game.sendTableData(table);
-            refresh.player = app.game.playerData.send(table);
+            refresh.seats  = app.game.playerData.send(table);
 
         return res.send(refresh);
     });
